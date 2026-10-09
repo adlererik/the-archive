@@ -29,6 +29,10 @@ The source and private archive data were transferred to a Debian 13 server, with
 
 The official cloudflared 2026.10.0 Linux amd64 binary was downloaded and verified against its release SHA-256 digest. A temporary systemd user connector successfully served the gallery and CMS login over verified HTTPS, both returning HTTP 200. The system-wide boot service installer, named-tunnel switch script, registry research, and purchasing guide are committed as source. Installing the boot service and secure-cookie configuration still requires the pending terminal sudo authentication. A Quick Tunnel URL is temporary and is not recorded in Git. No domain was purchased and no account-owned named tunnel has been enrolled yet.
 
+## Cast fix for a tunnel origin
+
+The running Debian server's Cast config returned `http://0.0.0.0:3000`, which is not an address a receiver can use to fetch media. The fix makes the sender use its current public HTTPS origin by default and preserves optional explicit media-host configuration. A video and generated photo slide both returned HTTP 206, MP4 content type, and wildcard CORS headers from the existing media endpoints. The updated local production build completed with TypeScript checking. Deployment to Debian and a repeat check on the physical Android Chrome/TV setup remain pending authenticated server access; no physical-TV success is claimed from these checks.
+
 ## Requires real devices
 
 Google Cast discovery and receiver playback require a supported Chrome browser, an HTTPS sender address, and a reachable physical receiver. These have not been verified with a TV. Physical touch swipes and device-specific mobile autoplay should also be checked on the intended phones. The wall provides native video controls and a speaker toggle when a browser blocks unmuted autoplay; the theater also provides a sound fallback.

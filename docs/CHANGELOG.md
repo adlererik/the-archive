@@ -4,6 +4,8 @@ By Erik Adler.
 
 ## October 9, 2026
 
+- By Erik Adler: fixed Google Cast media addressing behind Cloudflare HTTPS tunnels. The sender uses its current public HTTPS origin instead of the internal Next.js HTTP listener. Optional HTTPS media-host overrides remain supported, configuration is refreshed for each load, and failed receiver loads show a visible error without leaving local wall playback disabled.
+
 - Established the source-only GitHub repository with private visibility and Erik Adler commit attribution.
 - Added individual-media favorites, a saved list, manual ordering, and mixed photo/video presentations with image timing and repeat controls.
 - Added carousel touch swipes and consistent keyboard/button navigation; advancing past the final item returns to the wall.

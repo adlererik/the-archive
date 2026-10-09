@@ -4,6 +4,8 @@ By Erik Adler.
 
 For the Debian server's public HTTPS connector, domain purchasing, and custom-hostname setup, see [Cloudflare operations](CLOUDFLARE.md). The tunnel has its own systemd service; application restarts and updates do not require reinstalling it.
 
+After reviewed source updates have been transferred to `/home/erik/the-archive`, `sudo bash /home/erik/the-archive/deploy/rebuild-archive-root.sh` stops the service, preserves its previous `.next` build, compiles as `erik`, and starts the new build. On build or startup failure it restores the old build. This has a brief application outage, does not change dependencies or the database schema, and leaves the tunnel running. Build backups are retained under ignored `.runtime/build-backups/`; source and data backups remain separate.
+
 ## Start, stop, restart
 
 Run these commands from the project directory:

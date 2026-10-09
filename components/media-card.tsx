@@ -33,7 +33,7 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
   const manualPreview = useRef(false);
   const previewActive = useRef(false);
   const playbackDisabled = useRef(false);
-  playbackDisabled.current = theaterOpen || cast.connected || cast.busy;
+  playbackDisabled.current = theaterOpen || (cast.connected && Boolean(cast.mode)) || cast.busy;
   const item = post.mediaItems[preview] ?? post.mediaItems[0];
   const isVideo = item?.mediaType === "VIDEO";
   const carousel = post.mediaItems.length > 1;
@@ -64,7 +64,7 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
   const guardPlayback = useCallback((video: HTMLVideoElement) => { if (!previewActive.current || playbackDisabled.current) stopVideo(video); }, []);
   const audioRecovered = useCallback(() => setAudioBlocked(false), []);
 
-  useEffect(() => { if (playbackDisabled.current) stopPreview(); }, [theaterOpen, cast.connected, cast.busy, stopPreview]);
+  useEffect(() => { if (playbackDisabled.current) stopPreview(); }, [theaterOpen, cast.connected, cast.mode, cast.busy, stopPreview]);
   useEffect(() => { if (!theaterOpen && castingThisCard && item && cast.activeId !== item.id && !cast.busy) void cast.castItems([item]); }, [theaterOpen, castingThisCard, item, cast.activeId, cast.busy, cast.castItems]);
 
   function choosePreview(index: number) {
