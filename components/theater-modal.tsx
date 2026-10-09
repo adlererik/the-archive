@@ -8,6 +8,9 @@ import type { ArchivePost } from "@/lib/archive";
 import { mediaUrl } from "@/lib/archive";
 import { ageAt } from "@/lib/dates";
 import { useModal } from "@/lib/use-modal";
+import { FavoriteButton } from "./favorite-button";
+import { CastButton } from "./cast-button";
+import { useCast } from "./cast-provider";
 
 type Props = {
   post: ArchivePost;
@@ -19,6 +22,10 @@ type Props = {
 };
 
 export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevious, onNext }: Props) {
+  const cast = useCast();
+  const casting = cast.connected && cast.mode === "single";
+  const castingRef = useRef(false); castingRef.current = casting || cast.busy;
+  const wasCasting = useRef(false);
   const modalRef = useModal(onClose);
   const [mediaIndex, setMediaIndex] = useState(Math.min(initialMediaIndex, post.mediaItems.length - 1));
   const [playing, setPlaying] = useState(false);
@@ -29,6 +36,7 @@ export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevio
   const [volume, setVolume] = useState(1);
   const [playbackError, setPlaybackError] = useState("");
   const videoRef = useRef<HTMLVideoElement>(null);
+  const swipeStart = useRef<{ x: number; y: number; at: number } | null>(null);
   const media = post.mediaItems[mediaIndex];
   const isVideo = media?.mediaType === "VIDEO";
   const postIndex = posts.findIndex((entry) => entry.id === post.id);
@@ -47,6 +55,7 @@ export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevio
     setPlaybackError("");
     setAudioBlocked(false);
     setPlaying(false);
+    if (castingRef.current) { video.pause(); video.muted = true; return; }
     const start = video.play();
     void start.then(() => { if (videoRef.current === video) setPlaying(true); }).catch(async (error) => {
       if (videoRef.current !== video || error.name === "AbortError") return;
@@ -59,10 +68,24 @@ export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevio
     });
   }, []);
 
-  function changeMedia(index: number) {
+  useEffect(() => {
+    const active = casting || cast.busy;
+    if (active && videoRef.current) { videoRef.current.pause(); videoRef.current.muted = true; setPlaying(false); }
+    else if (wasCasting.current && videoRef.current) attachVideo(videoRef.current);
+    wasCasting.current = active;
+  }, [casting, cast.busy, attachVideo]);
+
+  useEffect(() => {
+    if (casting && cast.activeId !== media.id && !cast.busy) void cast.castItems([media]);
+  }, [casting, media.id, cast.activeId, cast.busy, cast.castItems, media]);
+
+  const moveCarousel = useCallback((direction: -1 | 1) => {
+    const next = mediaIndex + direction;
+    if (next >= post.mediaItems.length) { videoRef.current?.pause(); onClose(); return; }
+    if (next < 0) return;
     videoRef.current?.pause();
-    flushSync(() => setMediaIndex(index));
-  }
+    flushSync(() => setMediaIndex(next));
+  }, [mediaIndex, onClose, post.mediaItems.length]);
 
   useEffect(() => {
     const query = window.matchMedia("(max-width: 639px), (pointer: coarse)");
@@ -73,13 +96,13 @@ export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevio
 
   useEffect(() => {
     const keydown = (event: KeyboardEvent) => {
-      if ((event.target as HTMLElement)?.matches("input, textarea")) return;
-      if (event.key === "ArrowLeft" && postIndex > 0) onPrevious();
-      if (event.key === "ArrowRight" && postIndex < posts.length - 1) onNext();
+      if ((event.target as HTMLElement)?.matches("input, textarea, select, video")) return;
+      if (event.key === "ArrowLeft") { event.preventDefault(); if (post.mediaItems.length > 1) moveCarousel(-1); else if (postIndex > 0) onPrevious(); }
+      if (event.key === "ArrowRight") { event.preventDefault(); if (post.mediaItems.length > 1) moveCarousel(1); else if (postIndex < posts.length - 1) onNext(); }
     };
     window.addEventListener("keydown", keydown);
     return () => window.removeEventListener("keydown", keydown);
-  }, [onClose, onNext, onPrevious, postIndex, posts.length]);
+  }, [moveCarousel, onNext, onPrevious, postIndex, posts.length, post.mediaItems.length]);
 
   if (!media) return null;
 
@@ -110,31 +133,44 @@ export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevio
         <button onClick={onClose} className="fixed right-5 top-5 z-[60] flex min-h-12 items-center gap-2 rounded-full border border-white/35 bg-black/80 px-5 text-sm font-bold tracking-[0.15em] text-white backdrop-blur-md hover:border-[#d4af37] sm:right-8 sm:top-8"><span>CLOSE</span><X className="h-5 w-5" /></button>
         <div className="mx-auto flex min-h-[calc(100dvh-2.5rem)] max-w-6xl flex-col justify-center py-16 sm:min-h-[calc(100dvh-4rem)]">
           <motion.div key={post.id + media.id} initial={{ opacity: 0, scale: .98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .25 }} className="relative mx-auto w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 shadow-2xl">
-            <div className="relative flex min-h-[45vh] items-center justify-center bg-black">
-              {isVideo ? <video key={media.id} ref={attachVideo} src={mediaUrl(media.playbackFile || media.fileName)} controls={nativeControls} poster={media.thumbnail ? mediaUrl(media.thumbnail) : undefined} preload="auto" playsInline className="max-h-[70vh] w-full object-contain" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)} onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)} onEnded={() => setPlaying(false)} onVolumeChange={event => { if (!event.currentTarget.muted) setAudioBlocked(false); }} onError={() => { setPlaying(false); setPlaybackError("Unable to load this video. Try opening it in your phone’s player below."); }} /> : <img src={mediaUrl(media.fileName)} alt="Expanded archive memory" className="max-h-[72vh] w-full object-contain" />}
+            <div className="relative flex min-h-[45vh] items-center justify-center bg-black" onTouchStart={event => {
+              swipeStart.current = null;
+              if (event.touches.length !== 1 || (event.target as HTMLElement).closest("button, input")) return;
+              const point = event.touches[0]; const rect = event.currentTarget.getBoundingClientRect();
+              if (isVideo && point.clientY > (videoRef.current?.getBoundingClientRect().bottom || rect.bottom) - 80) return;
+              swipeStart.current = { x: point.clientX, y: point.clientY, at: Date.now() };
+            }} onTouchEnd={event => {
+              const start = swipeStart.current; swipeStart.current = null; const point = event.changedTouches[0];
+              if (!start || !point || Date.now() - start.at > 1000 || post.mediaItems.length < 2) return;
+              const dx = point.clientX - start.x; const dy = point.clientY - start.y;
+              if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) moveCarousel(dx < 0 ? -1 : 1);
+            }} onTouchCancel={() => { swipeStart.current = null; }}>
+              {isVideo ? <video key={media.id} ref={attachVideo} src={mediaUrl(media.playbackFile || media.fileName)} controls={nativeControls && !casting} poster={media.thumbnail ? mediaUrl(media.thumbnail) : undefined} preload="auto" playsInline className="max-h-[70vh] w-full object-contain" onPlay={event => { if (castingRef.current) { event.currentTarget.pause(); event.currentTarget.muted = true; } else setPlaying(true); }} onPause={() => setPlaying(false)} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)} onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)} onEnded={() => setPlaying(false)} onVolumeChange={event => { if (!event.currentTarget.muted) setAudioBlocked(false); }} onError={() => { setPlaying(false); setPlaybackError("Unable to load this video. Try opening it in your phone’s player below."); }} /> : <img src={mediaUrl(media.fileName)} alt="Expanded archive memory" className="max-h-[72vh] w-full object-contain" />}
               {post.mediaItems.length > 1 ? <>
-                {!nativeControls ? <button onClick={() => changeMedia((mediaIndex - 1 + post.mediaItems.length) % post.mediaItems.length)} className="absolute left-6 hidden h-20 w-20 place-items-center rounded-full border border-white/35 bg-black/65 text-white backdrop-blur-md hover:border-[#d4af37] sm:grid" aria-label="Previous carousel item"><ChevronLeft className="h-10 w-10" /></button> : null}
-                {!nativeControls ? <button onClick={() => changeMedia((mediaIndex + 1) % post.mediaItems.length)} className="absolute right-6 hidden h-20 w-20 place-items-center rounded-full border border-white/35 bg-black/65 text-white backdrop-blur-md hover:border-[#d4af37] sm:grid" aria-label="Next carousel item"><ChevronRight className="h-10 w-10" /></button> : null}
+                {!nativeControls ? <button disabled={mediaIndex === 0} onClick={() => moveCarousel(-1)} className="absolute left-6 hidden h-20 w-20 place-items-center rounded-full border border-white/35 bg-black/65 text-white backdrop-blur-md hover:border-[#d4af37] disabled:opacity-25 sm:grid" aria-label="Previous carousel item"><ChevronLeft className="h-10 w-10" /></button> : null}
+                {!nativeControls ? <button onClick={() => moveCarousel(1)} title={mediaIndex === post.mediaItems.length - 1 ? "Return to the wall" : "Next item"} className="absolute right-6 hidden h-20 w-20 place-items-center rounded-full border border-white/35 bg-black/65 text-white backdrop-blur-md hover:border-[#d4af37] sm:grid" aria-label="Next carousel item"><ChevronRight className="h-10 w-10" /></button> : null}
                 <span className="absolute left-1/2 top-5 -translate-x-1/2 rounded-full border border-white/20 bg-black/70 px-4 py-1.5 text-xs font-semibold tracking-[0.2em] text-white">{mediaIndex + 1} / {post.mediaItems.length}</span>
               </> : null}
-              {isVideo && !playing && !nativeControls ? <button onClick={togglePlayback} className="absolute left-1/2 top-1/2 hidden h-24 w-24 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/50 bg-black/65 text-white shadow-2xl backdrop-blur-md hover:border-[#d4af37] hover:text-[#f2ce70] sm:grid" aria-label="Play video"><Play className="ml-1 h-11 w-11 fill-current" /></button> : null}
+              {isVideo && !playing && !nativeControls && !casting ? <button onClick={togglePlayback} className="absolute left-1/2 top-1/2 hidden h-24 w-24 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/50 bg-black/65 text-white shadow-2xl backdrop-blur-md hover:border-[#d4af37] hover:text-[#f2ce70] sm:grid" aria-label="Play video"><Play className="ml-1 h-11 w-11 fill-current" /></button> : null}
             </div>
             {isVideo ? <div className="border-t border-white/10 bg-white/[.04] px-4 py-4 sm:px-7">
+              {casting ? <div className="flex flex-wrap items-center gap-3 text-sm text-[#f4d77e]"><span>Playing on {cast.device || "your TV"}</span><button onClick={cast.togglePlayback} className="min-h-11 rounded-full border border-white/25 px-4">{cast.paused ? "Play on TV" : "Pause on TV"}</button></div> : null}
               {playbackError ? <p className="mb-3 text-sm text-[#efce7a]">{playbackError}</p> : null}
               {audioBlocked ? <button onClick={togglePlayback} className="mb-3 min-h-12 rounded-full bg-[#d4af37] px-5 text-sm font-semibold text-black">{playing ? "Enable sound" : "Play with sound"}</button> : null}
-              {!nativeControls ? <div className="flex items-center gap-3 sm:gap-4">
+              {!nativeControls && !casting ? <div className="flex items-center gap-3 sm:gap-4">
                 <button onClick={togglePlayback} className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-white/20 text-white hover:border-[#d4af37]" aria-label={playing ? "Pause video" : "Play video"}>{playing ? <Pause className="h-5 w-5 fill-current" /> : <Play className="ml-0.5 h-5 w-5 fill-current" />}</button>
                 <input aria-label="Video timeline" type="range" min="0" max={duration || 0} step="0.01" value={Math.min(currentTime, duration || 0)} onChange={(event) => seek(Number(event.target.value))} className="min-w-0 flex-1" />
                 <Volume2 className="hidden h-5 w-5 shrink-0 text-white/75 sm:block" />
                 <input aria-label="Video volume" type="range" min="0" max="1" step="0.01" value={volume} onChange={(event) => changeVolume(Number(event.target.value))} className="hidden w-36 sm:block" />
               </div> : null}
-              {nativeControls ? <p className="text-xs leading-relaxed text-white/55">Use the video’s Play button and your phone’s volume buttons. {playbackError || !playing ? <button onClick={togglePlayback} className="ml-2 min-h-11 rounded-full border border-[#d4af37]/40 px-4 text-[#f4d77e]">Play with sound</button> : null}</p> : null}
+              {nativeControls && !casting ? <p className="text-xs leading-relaxed text-white/55">Use the video’s Play button and your phone’s volume buttons. {playbackError || !playing ? <button onClick={togglePlayback} className="ml-2 min-h-11 rounded-full border border-[#d4af37]/40 px-4 text-[#f4d77e]">Play with sound</button> : null}</p> : null}
               {playbackError ? <a href={mediaUrl(media.playbackFile || media.fileName)} target="_blank" rel="noreferrer" className="mt-2 inline-flex min-h-11 items-center text-sm text-[#f4d77e] underline">Open video in your phone’s player</a> : null}
             </div> : null}
-            {post.mediaItems.length > 1 && nativeControls ? <div className="flex items-center justify-between border-t border-white/10 px-3 py-2"><button onClick={() => changeMedia((mediaIndex - 1 + post.mediaItems.length) % post.mediaItems.length)} className="flex min-h-11 items-center gap-1 px-2 text-sm text-white" aria-label="Previous carousel item"><ChevronLeft className="h-5 w-5" /> Previous</button><span className="text-xs text-white/55">{mediaIndex + 1} / {post.mediaItems.length}</span><button onClick={() => changeMedia((mediaIndex + 1) % post.mediaItems.length)} className="flex min-h-11 items-center gap-1 px-2 text-sm text-white" aria-label="Next carousel item">Next <ChevronRight className="h-5 w-5" /></button></div> : null}
+            {post.mediaItems.length > 1 && nativeControls ? <div className="flex items-center justify-between border-t border-white/10 px-3 py-2"><button disabled={mediaIndex === 0} onClick={() => moveCarousel(-1)} className="flex min-h-11 items-center gap-1 px-2 text-sm text-white disabled:opacity-25" aria-label="Previous carousel item"><ChevronLeft className="h-5 w-5" /> Previous</button><span className="text-xs text-white/55">{mediaIndex + 1} / {post.mediaItems.length}</span><button onClick={() => moveCarousel(1)} className="flex min-h-11 items-center gap-1 px-2 text-sm text-white" aria-label="Next carousel item">{mediaIndex === post.mediaItems.length - 1 ? "Back to wall" : "Next"}<ChevronRight className="h-5 w-5" /></button></div> : null}
           </motion.div>
 
           <div className="mx-auto w-full max-w-5xl px-1 pt-8 sm:pt-10">
+            <div className="mb-5 flex flex-wrap items-center gap-3"><FavoriteButton mediaId={media.id} /><CastButton items={[media]} />{post.mediaItems.length > 1 ? <p className="text-xs text-white/50">Swipe left for the previous item; right for the next. After the final item, return to the wall.</p> : null}</div>
             <p className="font-editorial text-[26px] leading-tight text-[#f9f5e9] sm:text-4xl">{formatted} <span className="font-sans text-base text-[#d4af37] sm:text-lg">• Age {ageAt(post.takenAt)}</span></p>
             {post.caption ? <p className="mt-5 max-w-4xl whitespace-pre-wrap text-2xl leading-relaxed text-white/90">{post.caption}</p> : null}
             <div className="mt-10 flex justify-between gap-4 border-t border-white/10 pt-5">

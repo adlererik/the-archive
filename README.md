@@ -2,7 +2,7 @@
 
 By Erik Adler.
 
-A local photo and video preservation suite: an editorial timeline, full-screen media viewer, carousel previews, authenticated administration, and visitor statistics. Built with Next.js, TypeScript, Tailwind, Framer Motion, Lucide, Prisma, and SQLite.
+A local photo and video preservation suite: an editorial timeline, full-screen media viewer, carousel previews and swipes, individual favorites, photo/video presentations, media-only Google Cast, authenticated administration, and visitor statistics. Built with Next.js, TypeScript, Tailwind, Framer Motion, Lucide, Prisma, and SQLite.
 
 ## Run locally
 
@@ -31,8 +31,8 @@ Instagram exports are parsed locally by `scripts/import-instagram.ts`; no Instag
 
 Visit `/admin/login`. The initial username comes from `ADMIN_USERNAME`; the initial password comes from `ADMIN_PASSWORD`. Change both through Login settings. Existing database account settings take precedence over environment defaults. `./archive reset-login` provides local account recovery.
 
-The site stores local visitor statistics for its administrator. Public IP city estimates can be unavailable or inaccurate; local IPs are not stored. Favorites and casting documentation is maintained with the features.
+The site stores local visitor statistics for its administrator. Public IP city estimates can be unavailable or inaccurate; local IPs are not stored. [Favorites and casting](docs/FAVORITES-CASTING.md) covers presentations, Chrome/HTTPS requirements, and TV-reachable media URLs. [Account management](docs/ADMIN.md) covers login and account recovery.
 
 ## Project notes
 
-[Architecture](docs/ARCHITECTURE.md) describes storage, authentication, and streaming. Major source changes are committed with Erik Adler as the author. No personal archive content should be added to this repository.
+[Architecture](docs/ARCHITECTURE.md) describes storage, authentication, and streaming. [Development](docs/DEVELOPMENT.md) covers commits and source-only pushes, and [verification notes](docs/VERIFICATION.md) describe completed checks and device checks still needed. Major source changes are committed with Erik Adler as the author. No personal archive content should be added to this repository.

@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { ADMIN_COOKIE, isValidSession } from "@/lib/auth";
 import { toArchivePost } from "@/lib/archive";
 import { prisma } from "@/lib/prisma";
+import { removeCastSlides } from "@/lib/cast-slides";
 
 function uploadsPath(fileName: string) { return path.join(process.cwd(), "public", "uploads", path.basename(fileName)); }
 
@@ -36,6 +37,7 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   const record = await prisma.post.findUnique({ where: { id }, include: { mediaItems: true } });
   if (!record) return NextResponse.json({ error: "Memory not found" }, { status: 404 });
   await prisma.post.delete({ where: { id } });
+  await Promise.all(record.mediaItems.map(media => removeCastSlides(media.id)));
   await Promise.all(record.mediaItems.flatMap((media) => [media.fileName, media.thumbnail, media.playbackFile].filter((name): name is string => Boolean(name))).map((fileName) => unlink(uploadsPath(fileName)).catch(() => undefined)));
   revalidatePath("/");
   revalidatePath("/admin");

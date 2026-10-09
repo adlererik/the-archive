@@ -7,6 +7,7 @@ import type { ArchivePost } from "@/lib/archive";
 import { mediaUrl } from "@/lib/archive";
 import { ageAt } from "@/lib/dates";
 import { HeartButton } from "./heart-button";
+import { FavoriteButton } from "./favorite-button";
 
 type Props = { post: ArchivePost; isAdmin: boolean; theaterOpen: boolean; onOpen: (mediaIndex: number) => void; onEdit: () => void };
 
@@ -151,6 +152,7 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
         </button>
 
         <div className="pointer-events-none absolute inset-x-3 top-3 flex items-start justify-between gap-2">
+          <div className="pointer-events-auto absolute left-0 top-9"><FavoriteButton mediaId={item.id} compact /></div>
           {isVideo ? <span className="flex items-center gap-1.5 rounded-full border border-white/15 bg-black/65 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white backdrop-blur-md"><Play className="h-3 w-3 fill-current" /> Video</span> : <span />}
           {carousel ? <span className="flex items-center gap-1.5 rounded-full border border-[#d4af37]/35 bg-black/65 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f1cf76] backdrop-blur-md transition-transform group-hover:scale-110"><Images className="h-3 w-3" /> {preview + 1} / {post.mediaItems.length}</span> : null}
         </div>

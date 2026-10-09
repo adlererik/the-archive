@@ -6,6 +6,7 @@ const mime = { ".mp4": "video/mp4", ".mov": "video/quicktime", ".jpg": "image/jp
 // Stream directly from disk, including media uploaded after the server started.
 export async function serveMedia(req, res) {
   if (!req.url?.startsWith("/uploads/")) return false;
+  if (req.method === "OPTIONS") { res.writeHead(204, { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS", "Access-Control-Allow-Headers": "Range", "Access-Control-Max-Age": "86400" }); res.end(); return true; }
   if (req.method !== "GET" && req.method !== "HEAD") { res.writeHead(405, { Allow: "GET, HEAD" }); res.end(); return true; }
   let name;
   try { name = decodeURIComponent(req.url.split("?")[0].slice(9)); } catch { res.writeHead(400); res.end(); return true; }
@@ -15,6 +16,8 @@ export async function serveMedia(req, res) {
   if (!file?.isFile()) { res.writeHead(404); res.end(); return true; }
   const tag = '"' + file.size.toString(16) + "-" + Math.floor(file.mtimeMs).toString(16) + '"';
   res.setHeader("Content-Type", mime[path.extname(name).toLowerCase()] || "application/octet-stream");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Expose-Headers", "Content-Range, Content-Length, Accept-Ranges");
   res.setHeader("Accept-Ranges", "bytes");
   res.setHeader("Cache-Control", "public, max-age=86400");
   res.setHeader("ETag", tag);

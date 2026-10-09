@@ -30,7 +30,7 @@ const server = http.createServer(async (req, res) => {
     if (forwarded && isIP(forwarded)) ip = forwarded;
   }
   const pathname = (req.url || "").split("?")[0];
-  if (req.method === "GET" && ["/", "/privacy", "/admin", "/admin/login"].includes(pathname) && !req.headers.rsc && !req.headers["next-router-prefetch"]) {
+  if (req.method === "GET" && ["/", "/favorites", "/privacy", "/admin", "/admin/login"].includes(pathname) && !req.headers.rsc && !req.headers["next-router-prefetch"]) {
     const raw = (req.headers.cookie || "").split(";").map(c => c.trim()).find(c => c.startsWith("archive_visitor="))?.slice(16) || "";
     const [id, signature] = raw.split(".");
     const expected = id ? sign(id) : "";

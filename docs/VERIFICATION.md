@@ -1,0 +1,21 @@
+# Verification notes
+
+By Erik Adler. October 9, 2026.
+
+## Verified locally
+
+- Production build completes, including TypeScript checking, and the production launcher serves port 3000 on all network interfaces.
+- Individual photo/video favorites can be added, reordered, removed, and restored after a browser reload.
+- A timed photo advances to the next video; the video plays unmuted and completes the presentation. Pause/resume and native video controls remain available.
+- A 390px mobile viewport has no horizontal overflow. Video playback uses native controls, with carousel and presentation navigation below the media.
+- Carousel previous is disabled at the first item. Next and keyboard navigation advance through the carousel, then close it after the final item.
+- The favorites API preserves the requested order. Cast photo preparation produces a silent H.264 MP4 with the requested duration.
+- Cast photo streaming supports HEAD, byte ranges, and CORS. Upload video streaming accepts CORS Range preflight requests.
+- Admin Info displays the documentation included with the source repository.
+- The Git repository excludes uploads, SQLite databases, environment secrets, local import manifests, visitor information, and verification screenshots.
+
+## Requires real devices
+
+Google Cast discovery and receiver playback require a supported Chrome browser, an HTTPS sender address, and a reachable physical receiver. These have not been verified with a TV. Physical touch swipes and device-specific mobile autoplay should also be checked on the intended phones. The viewer provides native video controls and an Enable sound fallback when a browser blocks unmuted autoplay.
+
+After deployment, verify a single photo, a video with audio, a mixed favorites queue, repeat, pause/resume, navigation, and Stop casting. Confirm that only selected media appears on the TV, and that the TV queue continues when the local viewer closes.

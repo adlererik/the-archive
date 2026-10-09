@@ -1,0 +1,9 @@
+"use client";
+import { Cast, LoaderCircle, Square } from "lucide-react";
+import { useState } from "react";
+import type { ArchiveMedia } from "@/lib/archive";
+import { useCast, type CastOptions } from "./cast-provider";
+export function CastButton({ items, options, compact = false }: { items: ArchiveMedia[]; options?: CastOptions; compact?: boolean }) {
+  const cast = useCast(); const [help, setHelp] = useState(false); const active = cast.connected && (options?.mode === "presentation" ? cast.mode === "presentation" : cast.mode === "single" && items.some(media => media.id === cast.activeId));
+  return <div className="relative"><div className="flex items-center gap-2"><button type="button" aria-label={active ? "Casting media to " + cast.device : options?.mode === "presentation" ? "Cast favorites presentation" : "Cast this item"} aria-disabled={!cast.available || cast.busy} title={cast.reason} onClick={() => { if (!cast.available) { setHelp(!help); return; } if (!cast.busy) void cast.castItems(items, options); }} className={"inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full border bg-black/80 px-3 text-sm " + (active || cast.available ? "border-[#d4af37]/50 text-[#f4d77e]" : "border-white/20 text-white/40")}>{cast.busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Cast className="h-4 w-4" />}{compact ? null : cast.busy ? "Preparing…" : active ? "On " + cast.device : options?.mode === "presentation" ? "Cast presentation" : "Cast"}</button>{active ? <button onClick={cast.stop} aria-label="Stop casting" title="Stop casting" className="grid min-h-11 min-w-11 place-items-center rounded-full border border-white/20 text-white/70"><Square className="h-3 w-3 fill-current" /></button> : null}</div>{help || cast.error ? <p role="status" className="mt-2 max-w-xs text-xs leading-relaxed text-[#f4d77e]">{cast.error || cast.reason}</p> : null}</div>;
+}
