@@ -1,0 +1,27 @@
+[Unit]
+Description=The Archive for %i
+Wants=network-online.target
+After=network-online.target
+ConditionPathExists=/home/%i/the-archive/.next/BUILD_ID
+
+[Service]
+Type=simple
+User=%i
+WorkingDirectory=/home/%i/the-archive
+EnvironmentFile=-/home/%i/the-archive/.env
+EnvironmentFile=/home/%i/the-archive/.env.local
+Environment=NODE_ENV=production
+Environment=ARCHIVE_HOST=0.0.0.0
+Environment=ARCHIVE_PORT=3000
+Environment=NEXT_TELEMETRY_DISABLED=1
+Environment=PATH=/home/%i/the-archive/.runtime/node/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/home/%i/the-archive/.runtime/node/bin/node scripts/server.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=15
+NoNewPrivileges=true
+PrivateTmp=true
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

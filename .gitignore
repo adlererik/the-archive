@@ -1,4 +1,5 @@
 node_modules
+.runtime/
 .next
 prisma/dev.db
 prisma/dev.db-journal
