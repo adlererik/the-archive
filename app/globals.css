@@ -2,7 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
+:root {
+  color-scheme: dark;
+  --studio-accent: 212 175 55;
+  --studio-soft: 244 215 126;
+  --studio-counter: 241 207 118;
+  --studio-highlight: 232 196 87;
+  --studio-play: 242 206 112;
+  --studio-audio: 242 212 129;
+  --studio-date: 249 245 233;
+  --studio-caption: 251 249 243;
+  --studio-fill: 212 175 55;
+  --studio-hover: 232 196 87;
+  --studio-save: 229 189 81;
+  --studio-glow-top: 160, 114, 39;
+  --studio-glow-side: 71, 64, 114;
+  --studio-shadow: rgba(212,175,55,.35);
+}
+
+/* Erik Adler: graphite changes the gallery lighting and accents; black and gold hairlines stay. */
+:root[data-theme="graphite"] {
+  --studio-accent: 190 198 210;
+  --studio-soft: 213 217 224;
+  --studio-counter: 192 199 210;
+  --studio-highlight: 226 230 236;
+  --studio-play: 226 230 236;
+  --studio-audio: 226 230 236;
+  --studio-date: 245 246 248;
+  --studio-caption: 245 246 248;
+  --studio-fill: 58 63 72;
+  --studio-hover: 77 83 94;
+  --studio-save: 77 83 94;
+  --studio-glow-top: 118, 126, 139;
+  --studio-glow-side: 71, 77, 87;
+  --studio-shadow: rgba(131,142,159,.24);
+}
+
+:root[data-theme="graphite"] .bg-studio-fill { color: #f5f6f8; }
+:root[data-theme="graphite"] .archive-card,
+:root[data-theme="graphite"] .gallery-divider { border-color: rgba(212,175,55,.24); }
+:root[data-theme="graphite"] .archive-card:hover,
+:root[data-theme="graphite"] .archive-card:focus-within { border-color: rgba(212,175,55,.5); }
 
 * { box-sizing: border-box; }
 
@@ -29,8 +69,8 @@ button { -webkit-tap-highlight-color: transparent; }
 
 .page-glow {
   background:
-    radial-gradient(ellipse at 12% 0%, rgba(160, 114, 39, .16), transparent 35rem),
-    radial-gradient(ellipse at 90% 24%, rgba(71, 64, 114, .14), transparent 34rem),
+    radial-gradient(ellipse at 12% 0%, rgba(var(--studio-glow-top), .16), transparent 35rem),
+    radial-gradient(ellipse at 90% 24%, rgba(var(--studio-glow-side), .14), transparent 34rem),
     #070709;
 }
 
@@ -58,7 +98,7 @@ button { -webkit-tap-highlight-color: transparent; }
   overflow: hidden;
 }
 
-input[type="range"] { accent-color: #d4af37; }
+input[type="range"] { accent-color: rgb(var(--studio-accent)); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }

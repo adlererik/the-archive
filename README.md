@@ -21,6 +21,10 @@ Open `http://localhost:3000`. The server binds to `0.0.0.0` so devices on the sa
 
 Use `./archive stop`, `./archive restart`, and `./archive status` to manage the server. See [operations](docs/OPERATIONS.md) for migration, backups, updates, and boot startup.
 
+## Gallery themes
+
+Use the Theme button on the wall or Favorites page to choose Gold (the original warm palette) or Graphite (a neutral dark studio palette with thin gold outlines). Gold is the default. The selection is remembered on this browser and applies throughout the site. The black backgrounds and original photo/video colors stay unchanged. Clearing browser storage restores the default.
+
 ## Data stays outside Git
 
 Personal uploads, thumbnails, playback copies, SQLite databases, visitor records, local environment files, backups, import exports, screenshots, and runtime credentials are excluded by `.gitignore`. A clone contains the application source and documentation. Transfer your database and uploads separately when migrating.

@@ -42,9 +42,9 @@ export function AdminUploader() {
   }
 
   return <form onSubmit={submit} className="rounded-[1.5rem] border border-white/[0.09] bg-white/[0.035] p-5 backdrop-blur-xl sm:p-8">
-    <div onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); addFiles(event.dataTransfer.files); }} onClick={() => input.current?.click()} className={"cursor-pointer rounded-2xl border border-dashed p-10 text-center transition sm:p-16 " + (dragging ? "border-[#d4af37] bg-[#d4af37]/10" : "border-white/20 bg-black/20 hover:border-[#d4af37]/60")}>
+    <div onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); addFiles(event.dataTransfer.files); }} onClick={() => input.current?.click()} className={"cursor-pointer rounded-2xl border border-dashed p-10 text-center transition sm:p-16 " + (dragging ? "border-[#d4af37] bg-studio-fill/10" : "border-white/20 bg-black/20 hover:border-[#d4af37]/60")}>
       <input ref={input} type="file" accept=".mp4,.mov,.jpg,.jpeg,.png,.webp" multiple className="hidden" onChange={(event) => event.target.files && addFiles(event.target.files)} />
-      <UploadCloud className="mx-auto h-10 w-10 text-[#d4af37]" />
+      <UploadCloud className="mx-auto h-10 w-10 text-studio-accent" />
       <p className="mt-4 font-editorial text-2xl text-white">Drop the next memory here</p>
       <p className="mt-2 text-sm text-white/50">MP4, MOV, JPG, JPEG, PNG, or WEBP · add several files for a carousel</p>
     </div>
@@ -56,6 +56,6 @@ export function AdminUploader() {
       <label className="block text-sm text-white/75">Caption<textarea rows={3} value={caption} onChange={(event) => setCaption(event.target.value)} placeholder="Tell this memory's story…" className="mt-2 block w-full resize-y rounded-xl border border-white/15 bg-black/40 px-3 py-3 text-white outline-none placeholder:text-white/25 focus:border-[#d4af37]" /></label>
     </div>
     {message ? <p className={"mt-5 flex items-center gap-2 text-sm " + (message === "Memory added to The Archive." ? "text-emerald-300" : "text-red-300")}>{message === "Memory added to The Archive." ? <CheckCircle2 className="h-4 w-4" /> : <ImagePlus className="h-4 w-4" />}{message}</p> : null}
-    <div className="mt-7 flex justify-end"><button disabled={busy || !files.length} className="flex min-w-40 items-center justify-center gap-2 rounded-full bg-[#d4af37] px-6 py-3 text-sm font-bold text-black transition hover:bg-[#e8c457] disabled:cursor-not-allowed disabled:opacity-40">{busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />} Save to archive</button></div>
+    <div className="mt-7 flex justify-end"><button disabled={busy || !files.length} className="flex min-w-40 items-center justify-center gap-2 rounded-full bg-studio-fill px-6 py-3 text-sm font-bold text-black transition hover:bg-studio-hover disabled:cursor-not-allowed disabled:opacity-40">{busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />} Save to archive</button></div>
   </form>;
 }

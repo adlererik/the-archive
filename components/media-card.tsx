@@ -97,7 +97,7 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
     {inWindow ? isVideo && hovering && !theaterOpen ? (
       <WallVideo src={mediaUrl(item.playbackFile || item.fileName)} poster={item.thumbnail ? mediaUrl(item.thumbnail) : undefined} desktop={desktop} attach={attachVideo} onPlay={guardPlayback} onAudible={audioRecovered} />
     ) : isVideo && !item.thumbnail ? (
-      <div className="grid h-full place-items-center bg-gradient-to-br from-zinc-900 to-black"><Play className="h-14 w-14 text-[#d4af37]" /></div>
+      <div className="grid h-full place-items-center bg-gradient-to-br from-zinc-900 to-black"><Play className="h-14 w-14 text-studio-accent" /></div>
     ) : <img src={mediaUrl(item.thumbnail || item.fileName)} alt="Archive memory" draggable={false} loading="lazy" decoding="async" className="h-full w-full object-cover" /> : <div className="h-full w-full bg-gradient-to-br from-zinc-900 to-black" />}
     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/15" />
   </>;
@@ -112,14 +112,14 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
         <div className="pointer-events-none absolute left-3 right-16 top-3 flex items-start justify-between gap-2">
           <div className="pointer-events-auto absolute left-0 top-9"><FavoriteButton mediaId={item.id} compact /></div>
           {isVideo ? <span className="flex items-center gap-1.5 rounded-full border border-white/15 bg-black/65 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white backdrop-blur-md"><Play className="h-3 w-3 fill-current" /> Video</span> : <span />}
-          {carousel ? <span className="flex items-center gap-1.5 rounded-full border border-[#d4af37]/35 bg-black/65 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f1cf76] backdrop-blur-md transition-transform group-hover:scale-110"><Images className="h-3 w-3" /> {preview + 1} / {post.mediaItems.length}</span> : null}
+          {carousel ? <span className="flex items-center gap-1.5 rounded-full border border-[#d4af37]/35 bg-black/65 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-studio-counter backdrop-blur-md transition-transform group-hover:scale-110"><Images className="h-3 w-3" /> {preview + 1} / {post.mediaItems.length}</span> : null}
         </div>
 
-        {isVideo && !theaterOpen ? <button data-sound-toggle onClick={event => { event.stopPropagation(); toggleSound(); }} aria-label={audioBlocked && soundEnabled ? "Allow sound" : soundEnabled ? "Mute sound" : "Unmute sound"} aria-pressed={soundEnabled} title={audioBlocked && soundEnabled ? "Your browser requires a tap to allow sound" : soundEnabled ? "Mute sound" : "Unmute sound"} className="absolute right-3 top-16 z-20 grid h-11 w-11 place-items-center rounded-md bg-transparent text-white/70 drop-shadow-[0_1px_3px_rgba(0,0,0,.9)] transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">{soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}{audioBlocked && soundEnabled ? <span className="absolute right-2 top-2 h-1 w-1 rounded-full bg-[#d4af37]" /> : null}</button> : null}
+        {isVideo && !theaterOpen ? <button data-sound-toggle onClick={event => { event.stopPropagation(); toggleSound(); }} aria-label={audioBlocked && soundEnabled ? "Allow sound" : soundEnabled ? "Mute sound" : "Unmute sound"} aria-pressed={soundEnabled} title={audioBlocked && soundEnabled ? "Your browser requires a tap to allow sound" : soundEnabled ? "Mute sound" : "Unmute sound"} className="absolute right-3 top-16 z-20 grid h-11 w-11 place-items-center rounded-md bg-transparent text-white/70 drop-shadow-[0_1px_3px_rgba(0,0,0,.9)] transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">{soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}{audioBlocked && soundEnabled ? <span className="absolute right-2 top-2 h-1 w-1 rounded-full bg-studio-fill" /> : null}</button> : null}
         {isAdmin ? <button onClick={onEdit} className="absolute bottom-3 right-3 z-30 flex items-center gap-1 rounded-full border border-white/15 bg-black/70 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white backdrop-blur-md hover:border-[#d4af37]/60"><Pencil className="h-3 w-3" /> Edit</button> : null}
       </div>
       {carousel ? <div className="carousel-tray absolute inset-x-0 top-full z-20 rounded-b-2xl border border-[#d4af37]/40 bg-[#101014]/95 p-3 shadow-gold backdrop-blur-xl" aria-label="Carousel thumbnails">
-        <p className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-[0.12em] text-[#f1cf76]"><span>Explore this memory</span><span>{preview + 1} / {post.mediaItems.length}</span></p>
+        <p className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-[0.12em] text-studio-counter"><span>Explore this memory</span><span>{preview + 1} / {post.mediaItems.length}</span></p>
         <div className="flex gap-2 overflow-x-auto pb-1">
           {post.mediaItems.map((media, index) => <button key={media.id} onClick={() => choosePreview(index)} aria-label={"Preview carousel item " + (index + 1) + (media.mediaType === "VIDEO" ? ", video" : ", photo")} aria-pressed={preview === index} className={"relative h-16 w-14 shrink-0 overflow-hidden rounded-lg border-2 transition " + (preview === index ? "border-[#d4af37]" : "border-transparent hover:border-white/70")}>
             {inWindow && (media.thumbnail || media.mediaType === "IMAGE") ? <img src={mediaUrl(media.thumbnail || media.fileName)} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" /> : <span className="block h-full bg-zinc-800" />}
@@ -129,7 +129,7 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
       </div> : null}
       </div>
       <div className="min-h-[156px] px-4 py-4 sm:px-5">
-        <p className="font-editorial text-[22px] leading-tight text-[#fbf9f3]">{formatted} <span className="font-sans text-sm text-white/50">• Age {ageAt(post.takenAt)}</span></p>
+        <p className="font-editorial text-[22px] leading-tight text-studio-caption">{formatted} <span className="font-sans text-sm text-white/50">• Age {ageAt(post.takenAt)}</span></p>
         {post.caption ? <p className="mt-2 line-clamp-4 text-base leading-relaxed text-white/80 sm:text-[18px]">{post.caption}</p> : <p className="mt-2 text-sm italic text-white/35">Untitled memory</p>}
         <HeartButton postId={post.id} />
       </div>

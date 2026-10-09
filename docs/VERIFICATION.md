@@ -18,6 +18,7 @@ By Erik Adler. October 9, 2026.
 - The favorites API preserves the requested order. Cast photo preparation produces a silent H.264 MP4 with the requested duration.
 - Cast photo streaming supports HEAD, byte ranges, and CORS. Upload video streaming accepts CORS Range preflight requests.
 - Admin Info displays the documentation included with the source repository.
+- Gold and Graphite can be selected from the Theme button. Graphite survives a reload and navigation to Favorites; returning to Gold restores the original accent and warm glow values. A 390px viewport keeps the theme menu inside the screen without horizontal overflow. A 1280px viewport displays four gallery columns. Computed styles confirm a 1px gold card border, the unchanged `#070709` body background, and no image filter in Graphite. Escape closes the picker and returns focus to its button.
 - The Git repository excludes uploads, SQLite databases, environment secrets, local import manifests, visitor information, and verification screenshots.
 
 ## Requires real devices

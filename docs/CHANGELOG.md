@@ -39,3 +39,10 @@ Personal archive imports and their verification artifacts remain local. They are
 - Retry requested audio from click, touch-end, pointer-up, and keyboard interactions instead of relying on pointer-down.
 - Prioritize a newly selected carousel video immediately, and ignore stale playback promises when the shared player changes sources.
 - Keep the speaker in its default sound-on state when a browser blocks audio; a tiny gold dot indicates a tap is required. Explicit mute is still respected.
+
+## Gold and graphite gallery themes
+
+- By Erik Adler: added a Theme button on the wall and Favorites page, with the original Gold palette and a Graphite studio palette.
+- Graphite replaces warm ambient lighting, surface tints, shadows, and text accents with neutral grays, while retaining black backgrounds and thin gold borders.
+- Central palette variables cover the wall, viewer, favorites, casting controls, and management pages without applying filters to personal media.
+- The palette is remembered per browser and applied before first paint. Theme menus support keyboard operation and stay within compact viewports.
