@@ -1,0 +1,34 @@
+{
+  "name": "the-archive",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "ARCHIVE_DEV=true node scripts/server.mjs",
+    "build": "prisma generate && next build",
+    "start": "node scripts/site.mjs start",
+    "restart": "node scripts/site.mjs restart",
+    "db:push": "prisma db push",
+    "import:instagram": "tsx scripts/import-instagram.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.16.2",
+    "framer-motion": "^12.23.24",
+    "geoip-lite": "^2.0.3",
+    "lucide-react": "^0.544.0",
+    "next": "^15.5.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "prisma": "^6.16.2",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}

@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Post {
+  id         String      @id @default(cuid())
+  caption    String      @default("")
+  sourceId   String?     @unique
+  takenAt    DateTime
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  mediaItems MediaItem[]
+  likes      PostLike[]
+
+  @@index([takenAt])
+}
+
+model MediaItem {
+  id           String   @id @default(cuid())
+  postId       String
+  fileName     String   @unique
+  originalName String
+  thumbnail    String?
+  playbackFile String?
+  mediaType    MediaType
+  position     Int
+  createdAt    DateTime @default(now())
+  post         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId, position])
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+model PostLike {
+  id         String   @id @default(cuid())
+  postId     String
+  visitorKey String
+  createdAt  DateTime @default(now())
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, visitorKey])
+}
+
+model SiteSettings {
+  id          String @id @default("site")
+  title       String @default("The Archive")
+  eyebrow     String @default("Private collection")
+  description String @default("A continuous preservation of the moments that made a life.")
+}
+
+model Visit {
+  id         String   @id @default(cuid())
+  visitorKey String
+  ip         String
+  city       String @default("")
+  country    String @default("")
+  region     String @default("")
+  device     String
+  os         String
+  browser    String
+  userAgent  String
+  language   String
+  referrer   String
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([visitorKey])
+}
+
+model AdminAccount {
+  id             String @id @default("admin")
+  username       String
+  passwordHash   String
+  sessionVersion String @default("bootstrap")
+}

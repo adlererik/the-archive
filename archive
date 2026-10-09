@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+archive_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+archive_node="/home/erikclean/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node"
+if command -v node >/dev/null 2>&1; then archive_node="$(command -v node)"; fi
+if [ ! -x "$archive_node" ]; then echo "Node.js 20 or newer is required to run The Archive." >&2; exit 1; fi
+export PATH="$(dirname -- "$archive_node"):$PATH"
+cd -- "$archive_root"
+if [ "$#" -eq 0 ]; then set -- start; fi
+exec "$archive_node" "$archive_root/scripts/site.mjs" "$@"
