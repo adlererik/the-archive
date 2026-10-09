@@ -5,6 +5,7 @@ import datetime
 import json
 from pathlib import Path
 import socket
+import sys
 import urllib.error
 import urllib.request
 
@@ -13,8 +14,9 @@ def fetch(url):
 
 bootstrap = json.load(fetch("https://data.iana.org/rdap/dns.json"))
 endpoints = {tld: urls[0] for tlds, urls in bootstrap["services"] for tld in tlds}
-domains = [f"chocolatesweetcake.{tld}" for tld in ("com", "net", "org", "me")]
-domains += [f"{name}.{tld}" for name in ("ellieadlersworld", "elliesarchive", "elliesworld") for tld in ("com", "net", "org", "me", "life", "family")]
+domains = [name.strip().lower() for name in sys.argv[1:] if name.strip()]
+if not domains or any("." not in name or "/" in name or " " in name for name in domains):
+    raise SystemExit("Usage: python3 scripts/check-domains.py yourchosenname.com yourchosenname.page")
 
 def check(domain):
     base = endpoints.get(domain.rsplit(".", 1)[1])

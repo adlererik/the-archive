@@ -1,26 +1,26 @@
 # Cloudflare HTTPS, domains, and server operations
 
-By Erik Adler. October 9, 2026.
+By Erik Adler. Updated for v1.1.0.
 
 ## Server layout
 
-The Archive remains at `/home/erik/the-archive` on Debian `192.168.1.225`, serving port 3000 through `the-archive@erik.service`. Its separate tunnel service is `the-archive-tunnel.service`. The connector is Cloudflare's official Linux amd64 `cloudflared` 2026.10.0, verified against the SHA-256 digest published with its GitHub release. Its binary, runner, mode configuration, and systemd unit are installed outside the application checkout:
+On your Debian installation, the CMS serves port 3000 through `the-archive@youruser.service`; replace `youruser` with your account name. Its separate connector is `the-archive-tunnel.service`. Install Cloudflare's official cloudflared binary for your machine's architecture. The binary, runner, mode configuration, and systemd unit are installed outside the checkout:
 
 - `/usr/local/bin/cloudflared`
 - `/usr/local/libexec/the-archive-tunnel-run`
 - `/etc/the-archive-tunnel/tunnel.env`
 - `/etc/systemd/system/the-archive-tunnel.service`
 
-The service runs as `erik`, restarts after exits, starts at boot, and connects outbound to Cloudflare. It does not require opening inbound ports on the router. No application database or media migration is needed for a hostname change.
+The service runs as the installation owner, restarts after exits, starts at boot, and connects outbound to Cloudflare. It does not require opening inbound ports on the router. No application database or media migration is needed for a hostname change.
 
 Cloudflare documents [Quick Tunnels](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/) as temporary development tunnels: their URL changes when the connector restarts, there is no uptime guarantee, and they have request and SSE limitations. Systemd makes the process persistent; it does not make a Quick Tunnel hostname permanent. A Quick Tunnel cannot simply become a custom-domain tunnel. An account-owned named tunnel is needed once. The prepared runner supports that change using the existing binary and systemd unit. After that one-time change, additional hostnames require only dashboard routes.
 
 ## Initial installation
 
-The verified binary must be staged at `.runtime/cloudflared/cloudflared` and the deployment scripts must be present. On the Debian server:
+Install the official binary at `/usr/local/bin/cloudflared`, or use the supported pinned staging binary described in [public setup](PUBLIC-SETUP.md). Run these commands from your checkout on the Debian server:
 
 ```bash
-sudo bash /home/erik/the-archive/deploy/setup-cloudflare-root.sh
+sudo bash deploy/setup-cloudflare-root.sh "$USER"
 ```
 
 The installer verifies the binary, installs and enables the tunnel unit, sets `SESSION_COOKIE_SECURE=true` and `TRUST_PROXY=true` in `.env.local`, and restarts the application to apply them. A private environment backup is retained under `.runtime/`. The local proxy is trusted only for loopback connections. Admin login should now use the HTTPS address; plain HTTP LAN access still serves the gallery but cannot send secure session cookies.
@@ -54,7 +54,7 @@ These steps follow the official [registration guide](https://developers.cloudfla
 4. On the Debian server, run:
 
    ```bash
-   sudo bash /home/erik/the-archive/deploy/use-named-cloudflare-tunnel.sh
+   sudo bash deploy/use-named-cloudflare-tunnel.sh
    ```
 
    At the hidden prompt, paste **only the token**, not the full dashboard command. The script stores it in `/etc/the-archive-tunnel/token` with permission 600, switches `TUNNEL_MODE=named`, and restarts the same service. Tokens must never go into Git, chat, screenshots, or command arguments.
@@ -63,7 +63,7 @@ These steps follow the official [registration guide](https://developers.cloudfla
 7. Choose a hostname: use `www` as the subdomain and your purchased domain, or leave the subdomain empty for the apex domain if supported by the form.
 8. Set **Service URL** to `http://localhost:3000` (or **Type: HTTP**, **URL: localhost:3000**, if the form uses separate fields).
 9. Select **Add route**. Cloudflare creates the tunnel DNS route. Add a second route if you want both apex and `www`.
-10. Open `https://your-domain/` and `https://your-domain/admin/login`. If there is a conflicting DNS record for the same hostname, replace that record with the tunnel route; do not point the public hostname at the private `192.168.1.225` address.
+10. Open `https://your-domain/` and `https://your-domain/admin/login`. If there is a conflicting DNS record for the same hostname, replace that record with the tunnel route; do not point the public hostname at the server's private LAN address.
 
 These dashboard labels follow the current [Cloudflare Tunnel setup guide](https://developers.cloudflare.com/tunnel/get-started/). Older Cloudflare Zero Trust dashboards may expose this under **Networks → Connectors → Cloudflare Tunnels**, with **Public Hostnames** instead of **Published application**. The destination remains the same local port 3000.
 
@@ -83,6 +83,6 @@ systemctl is-active the-archive-tunnel
 sudo journalctl -u the-archive-tunnel -n 100 --no-pager
 ```
 
-Stopping the tunnel removes public access while the LAN site can stay running. Stopping the application uses `sudo systemctl stop the-archive@erik`. Both enabled services start at boot. To disable tunnel boot startup, use `sudo systemctl disable --now the-archive-tunnel`. Re-enable it with `sudo systemctl enable --now the-archive-tunnel`.
+Stopping the tunnel removes public access while the LAN site can stay running. Stopping the application uses `sudo systemctl stop the-archive@youruser`. Both enabled services start at boot. To disable tunnel boot startup, use `sudo systemctl disable --now the-archive-tunnel`. Re-enable it with `sudo systemctl enable --now the-archive-tunnel`.
 
 Automatic binary updates are disabled because systemd supervises the process. To update, obtain a new official [cloudflared release](https://github.com/cloudflare/cloudflared/releases), verify its release digest, stop the tunnel, install the verified binary at `/usr/local/bin/cloudflared`, and restart it. Preserve `/etc/the-archive-tunnel/` and the systemd unit. Application updates follow [Operations](OPERATIONS.md) and do not require recreating the tunnel. A Quick Tunnel restart changes its URL; a named tunnel's configured custom hostname stays stable.

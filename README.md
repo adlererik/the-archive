@@ -1,65 +1,97 @@
 # The Archive
 
-By **Erik Adler** · [MIT license](LICENSE)
+### A self-hosted Instagram replacement for your photos, videos, and memories
 
-A self-hosted photo and video gallery with an editorial timeline, carousel previews and swipes, a desktop theater, browser-local favorites, photo/video presentations, media-only Google Cast, authenticated administration, and visitor statistics. Built with Next.js, TypeScript, Tailwind, Framer Motion, Lucide, Prisma, and SQLite.
+By **Erik Adler** · **v1.1.0** · [MIT license](LICENSE)
 
-## Get started
+Publish your own photo and video collection on a website you control. The Archive combines an Instagram-style chronological wall with a cinematic gallery, fast thumbnail browsing, favorites, presentations, and Google Cast. Your original media and database live on your own computer or server.
 
-Linux prerequisites: **Node.js 24+**, **pnpm 12.10.1**, **FFmpeg / FFprobe**, Git, and Bash. Install pnpm with `npm install -g pnpm@12.10.1`; on Debian, install FFmpeg with `sudo apt-get install ffmpeg`. Obtain Node from [nodejs.org](https://nodejs.org/en/download).
+It focuses on personal galleries and media preservation: viewers can browse memories, give hearts, save favorite photos and videos, and put them on a television. You manage uploads, captions, dates, your gallery header, and your login from the built-in CMS.
+
+## Start here
+
+**New to servers or the terminal? Follow the [beginner walkthrough](docs/BEGINNER-GUIDE.md).** It explains installation, your first login and upload, TV casting, public HTTPS, boot startup, upgrades, and backups one step at a time.
+
+- [Download v1.1.0](https://github.com/adlererik/the-archive/releases/tag/v1.1.0)
+- [Complete feature guide](docs/FEATURES.md)
+- [Installation and deployment reference](docs/PUBLIC-SETUP.md)
+- [Favorites and casting guide](docs/FAVORITES-CASTING.md)
+- [Release notes](docs/RELEASE-v1.1.0.md)
+
+## What you can do
+
+| Feature | What it gives you |
+| --- | --- |
+| Continuous timeline | Newest memories first, seamless older-post loading, captions, dates, and configurable milestone ages. |
+| Every-media thumbnail wall | A compact grid of every image and video, including carousel contents; jump to a year and return to the same scroll position after viewing. |
+| Carousel browsing | Swipe left for next, right for previous; use thumbnail previews for direct selection. |
+| Desktop theater | A large media viewer with full captions, audio, media navigation, and keyboard controls. |
+| Mobile playback | Inline photos/videos and native video controls, with playback following the visible item. |
+| Controlled sound | Sound requested by default, a small speaker toggle, and one active local video to avoid overlapping audio. |
+| Google Cast | Send the selected media to a compatible TV from a discreet overlay, including directly from the wall. |
+| Personal favorites | Save individual carousel photos/videos, reorder them, and build a presentation. |
+| TV presentations | Timed photos and complete videos, optional repeat, receiver-side queues, and play/pause/stop controls. |
+| Hearts | Visitors can like a whole post separately from saving individual favorites. |
+| Gold / Graphite themes | Warm editorial styling or a dark studio palette, with black backgrounds and thin gold borders. |
+| Built-in CMS | Drag-and-drop uploads, multi-file carousels, backdated memories, and inline caption/date editing. |
+| Custom header and login | Change the title, introductory text, username, and password from Admin. |
+| Visitor statistics | Approximate city/country, device, OS/browser, and counts, with a clear-all action. |
+| Instagram export import | Bring your own downloaded export, preserving dates and carousel order and repairing common caption encoding issues. |
+| Local preservation | Original files, SQLite data, generated previews, compatible video copies, and direct byte-range media streaming. |
+| Your own server and domain | Debian boot services, Cloudflare HTTPS/tunnels, backup/migration guidance, and release-based upgrades. |
+| Documentation in Admin | Beginner, feature, operations, and casting guides are available from the Info panel. |
+
+See [all features and their limits](docs/FEATURES.md).
+
+## Quick installation
+
+Supported starting point: **Linux**, **Node.js 24+**, **pnpm 12.10.1**, **FFmpeg / FFprobe**, **Git**, and **Bash**. The beginner guide includes copy-and-paste Debian/Ubuntu prerequisite commands.
 
 ```bash
-git clone https://github.com/adlererik/the-archive.git
+git clone --branch v1.1.0 https://github.com/adlererik/the-archive.git
 cd the-archive
 ./archive setup
 ./archive start
 ```
 
-Open [localhost:3000](http://localhost:3000). Setup installs the locked dependencies, creates an **empty** SQLite database, generates a unique admin password and session secret in private `.env.local`, and builds the application. Read your password from that file locally; the initial username is `admin`. Sign in at `/admin/login`, then upload your own photos and videos. Change the username, password, and gallery header in Admin.
+Open [http://localhost:3000](http://localhost:3000). Setup installs locked dependencies, creates an **empty** SQLite database, generates a unique admin password and session secret, and builds the application. The initial username is **admin**. Read your generated password from private `.env.local`, sign in at `/admin/login`, and upload your own media.
 
-Set `NEXT_PUBLIC_BIRTH_DATE` in `.env.local`, then rebuild to change milestone ages. Setup preserves existing environment files and does not automatically accept destructive database changes. It never includes the author's archive, credentials, or visitor records.
+A release download contains source code, documentation, schema, and lockfile. Dependencies are installed during setup. Source ZIP/tarball checksums are supplied with the release.
 
-Prefer a download? Use the source ZIP or tarball on the [Releases page](https://github.com/adlererik/the-archive/releases). Extract it, install the prerequisites above, then run `./archive setup` and `./archive start` inside the folder. Release checksums are provided.
+## Start, stop, restart
 
-## Features
-
-- Continuous chronological photo/video wall with carousel previews and touch swipes.
-- Toggle a dense thumbnail wall containing every carousel image/video, jump to a year, and save individual Favorites directly. Closing the viewer restores the same browsing position.
-- Video playback follows the visible media; sound is requested by default, with a discreet mute control. Browsers can require a tap before allowing audio.
-- Gold and Graphite gallery themes; black backgrounds and thin gold outlines remain intact.
-- Favorites for individual images/videos, ordered presentations, and media-only Google Cast.
-- Mobile native video controls without oversized controls covering the picture.
-- Admin upload, caption/date editing, deletion, header customization, and account settings.
-- Local visitor statistics with approximate city/device/browser information, no stored local IPs, and a clear-statistics action.
-- Local Instagram export import, filesystem media streaming, thumbnails, and video processing.
-
-## Manage your installation
+Run these inside the project folder:
 
 ```bash
 ./archive status
 ./archive stop
 ./archive build
 ./archive start
-# Restart an already running launcher:
 ./archive restart
 ```
 
-The default listener is `0.0.0.0:3000`. A busy port produces an error instead of silently starting a duplicate site on port 3001. `ARCHIVE_PORT` can override the port explicitly. Keep the start terminal open, or install the Debian systemd service for unattended operation.
+The default listener is `0.0.0.0:3000`; Wi-Fi devices can use your computer's LAN address. A busy port produces an error instead of silently launching a duplicate site on 3001. Keep the start terminal open for a foreground installation, or use the documented Debian boot service.
 
-See [public setup and deployment](docs/PUBLIC-SETUP.md) for installation, updates, backups, migration, boot startup, and Cloudflare. [Operations](docs/OPERATIONS.md) includes the original installation's examples; replace its account and paths with your own.
+## Import an Instagram export
 
-## Casting and mobile playback
+Extract your export locally, then run:
 
-Open the sender in a supported Chrome browser over **HTTPS**. The TV must be able to fetch the selected media from that HTTPS URL. The casting fix uses the browser's public origin by default, rather than the server's internal listening address. It refreshes configuration before each load and displays receiver errors. Optional `CAST_MEDIA_ORIGIN` must point to another TV-reachable media host, if used.
+```bash
+INSTAGRAM_EXPORT_DIR="/path/to/your/extracted-export" pnpm import:instagram
+```
 
-Cast needs a compatible receiver. Photos are prepared as MP4 slides; FFmpeg is required. Browser autoplay restrictions cannot be overridden by the site: if unmuted autoplay is blocked, tap Play or the speaker control once. See [favorites and casting](docs/FAVORITES-CASTING.md).
+The importer reads JSON directly from disk, preserves timestamps/carousels, fixes common caption encoding, and copies your media into `public/uploads/`. Existing imported source IDs prevent duplicate imports. Import only files and media you are entitled to use.
 
-## Import your own archive
+## Playback and casting requirements
 
-Extract an Instagram export locally, set `INSTAGRAM_EXPORT_DIR` to its directory, then run `pnpm import:instagram`. The importer reads the JSON from disk, fixes common caption encoding problems, preserves dates/carousel order, and copies media into `public/uploads/`. No Instagram credentials are needed. See [architecture](docs/ARCHITECTURE.md).
+Google Cast needs supported Chrome, a compatible receiver, an HTTPS gallery, and media the TV can fetch. Only selected media or a favorites queue is sent to the TV. Photos are converted locally to still-image MP4 slides; FFmpeg is required.
 
-## Privacy, security, and license
+Browsers can require a tap before allowing audible autoplay. The gallery requests sound by default and provides a discreet speaker control and native mobile video controls. Favorites and theme preferences are stored per browser and site address.
 
-Uploads, thumbnails, playback copies, SQLite databases, environment files, backups, export manifests, screenshots, and runtime credentials are excluded from Git and release packages. Back them up separately. Favorites are saved in each viewer's browser. Visitor statistics belong to the installation's private database; adapt the included `/privacy` notice to your deployment.
+## Privacy and ownership
 
-Use HTTPS and your own strong credentials before public hosting. See [security guidance](SECURITY.md), [administration](docs/ADMIN.md), [development](docs/DEVELOPMENT.md), and [verification notes](docs/VERIFICATION.md). Application source is MIT licensed; supply only media you have permission to use.
+**Passwords, session/tunnel tokens, personal media, populated databases, visitor records, environment files, private backups, screenshots, runtime binaries, and build output are excluded from release downloads.** Each new installation starts empty and generates its own credentials.
+
+The gallery is public wherever you publish it; Admin requires login. Keep your private backups separate, use HTTPS for public access, and customize the included visitor privacy notice for your installation. See [security guidance](SECURITY.md), [administration](docs/ADMIN.md), and [operations](docs/OPERATIONS.md).
+
+Built with Next.js, TypeScript, Tailwind CSS, Framer Motion, Lucide, Prisma, and SQLite. Application source is MIT licensed. Instagram is a trademark of its owner; this project is independent and is not affiliated with Instagram or Meta.

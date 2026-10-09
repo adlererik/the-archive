@@ -2,6 +2,8 @@
 
 By Erik Adler.
 
+New to this? Start with the [beginner walkthrough](BEGINNER-GUIDE.md) and [feature guide](FEATURES.md).
+
 ## Local installation
 
 Use Linux with Node.js 24+, pnpm 12.10.1, FFmpeg/FFprobe, Git, and Bash. The lockfile fixes dependency versions. Install pnpm using `npm install -g pnpm@12.10.1`; install FFmpeg on Debian using `sudo apt-get install ffmpeg`. Node must be on PATH, or installed privately at `.runtime/node/bin/node`.
@@ -59,7 +61,7 @@ Make a private backup first. Prefer a published release tag:
 
 ```bash
 git fetch origin --tags
-git checkout v1.0.0  # Substitute the release you intend to install.
+git checkout v1.1.0  # Substitute the release you intend to install.
 ./archive install
 # Review schema changes, then apply only if appropriate:
 pnpm db:push

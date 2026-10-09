@@ -2,6 +2,15 @@
 
 By Erik Adler.
 
+## v1.1.0 — October 10, 2026
+
+- By Erik Adler: publish the all-media thumbnail wall with year jumps, exact carousel-item viewing, scroll restoration, and quick Favorites collection building.
+- Explain The Archive as a self-hosted replacement for Instagram's photo-sharing and memory-preservation workflow.
+- Add complete feature documentation and a beginner installation/operation walkthrough, available in Admin Info.
+- Generalize public Cloudflare, domain research, and operations examples for independent installations.
+- Include all earlier mobile playback, swipe navigation, Gold/Graphite themes, admin, favorites, presentation, and media-only casting fixes.
+- Publish source-only downloads with checksums, unique fresh-install credentials, and private-data exclusion checks.
+
 ## October 9, 2026
 
 - By Erik Adler: fixed Google Cast media addressing behind Cloudflare HTTPS tunnels. The sender uses its current public HTTPS origin instead of the internal Next.js HTTP listener. Optional HTTPS media-host overrides remain supported, configuration is refreshed for each load, and failed receiver loads show a visible error without leaving local wall playback disabled.
