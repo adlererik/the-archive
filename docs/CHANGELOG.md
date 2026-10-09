@@ -58,3 +58,10 @@ Personal archive imports and their verification artifacts remain local. They are
 - Added public setup, operations, migration, security, and release documentation to the repository and Admin Info.
 - Recorded the project owner's confirmation that the Android Chrome/TV casting fix works. Private media and installation records remain outside Git and release assets.
 - Fixed fresh SQLite initialization and launcher controls for long checkout paths discovered during the clean-install verification.
+
+## October 10, 2026 — thumbnail wall
+
+- By Erik Adler: added a main-wall toggle for a dense, responsive thumbnail grid, including every photo and video inside carousels.
+- Retrieve the complete chronological metadata index in the background and virtualize nearby rows with lazy static previews.
+- Open the exact selected carousel item on mobile and desktop; restore the wall position after closing or reaching the final carousel item.
+- Preserve separate timeline/thumbnail scroll positions, add year jumps and keyboard navigation, and provide per-thumbnail Favorites stars for quick TV presentation collection building.

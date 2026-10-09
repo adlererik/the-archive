@@ -8,6 +8,14 @@ Tap the star on a wall preview or in the media viewer to save that individual ph
 
 Open Favorites from the archive header. Use the up/down controls to arrange the presentation order, or tap a saved item to inspect it. Favorites are stored in this browser's local storage. They are not shared between devices or accounts, and clearing browser data removes the list. Items deleted by the archive owner become unavailable; the list offers a cleanup button.
 
+## Thumbnail wall for quick collection building
+
+Use **Thumbnail wall** in the archive header to switch from the timeline to a dense grid of 56px-wide previews, matching the carousel thumbnails. The grid fills the gallery width, adapts its column count to the screen, and includes every image and video from every carousel in chronological order. It automatically retrieves older post metadata, with a loading indicator until the complete index is available. Only nearby rows are mounted and images load lazily; video thumbnails stay static while browsing.
+
+Use **Jump to year** to find older memories. Tap a thumbnail to open that exact carousel item on desktop or mobile. Its original date, caption, video player, Favorites action, and Cast control remain available. Close it to return to the same thumbnail-wall scroll position. Swipe past a carousel's last item to return to that position as well. Tap the thumbnail's small star to save it without opening the viewer. The filled star identifies saved items.
+
+Use **Timeline** to return to the default view. Each view retains its scroll position while the page remains open. Favorites built in thumbnail mode use the existing browser-local Favorites list and can be ordered, presented, and cast from Favorites. The thumbnail grid itself is not cast to the TV.
+
 ## Presentations
 
 Choose a photo duration and optional Repeat presentation, then press Play presentation. Photos advance after they load and their selected display interval passes. Videos play with their audio and advance when they finish. Pause, resume, replay, previous, next, and Close presentation are available below the media. Mobile videos retain native playback controls; browser audio restrictions can require an Enable sound tap.

@@ -24,6 +24,7 @@ Prefer a download? Use the source ZIP or tarball on the [Releases page](https://
 ## Features
 
 - Continuous chronological photo/video wall with carousel previews and touch swipes.
+- Toggle a dense thumbnail wall containing every carousel image/video, jump to a year, and save individual Favorites directly. Closing the viewer restores the same browsing position.
 - Video playback follows the visible media; sound is requested by default, with a discreet mute control. Browsers can require a tap before allowing audio.
 - Gold and Graphite gallery themes; black backgrounds and thin gold outlines remain intact.
 - Favorites for individual images/videos, ordered presentations, and media-only Google Cast.
