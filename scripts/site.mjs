@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { chmod, mkdir, unlink, writeFile } from "node:fs/promises";
+import { chmod, lstat, mkdir, unlink, writeFile } from "node:fs/promises";
 import { createServer, createConnection } from "node:net";
 import os from "node:os";
 import path from "node:path";
@@ -8,7 +9,18 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const work = path.join(root, "work");
-const socketPath = path.join(work, "archive-server.sock");
+let socketPath = path.join(work, "archive-server.sock");
+// Unix sockets have short path limits; long checkout paths still need controls.
+if (Buffer.byteLength(socketPath) > 100) {
+  const uid = process.getuid();
+  const name = "the-archive-" + uid + "-" + createHash("sha256").update(root).digest("hex").slice(0, 24);
+  const directory = path.join(os.tmpdir(), name);
+  await mkdir(directory, { recursive: true, mode: 0o700 });
+  const info = await lstat(directory);
+  if (!info.isDirectory() || info.uid !== uid) throw new Error("Unsafe launcher control directory.");
+  await chmod(directory, 0o700);
+  socketPath = path.join(directory, "server.sock");
+}
 const next = path.join(root, "node_modules/next/dist/bin/next");
 const prisma = path.join(root, "node_modules/prisma/build/index.js");
 const packageManager = path.join(work, "toolchain/pnpm/bin/pnpm.mjs");
@@ -114,7 +126,8 @@ async function supervise() {
 
 try {
   const command = process.argv[2] || "start";
-  if (command === "build") { await run(prisma, ["generate"]); await run(next, ["build"]); }
+  if (command === "setup") { await run(path.join(root, "scripts/setup.mjs")); await dependencies(["install", "--frozen-lockfile"]); await run(prisma, ["db", "push"]); await run(next, ["build"]); }
+  else if (command === "build") { await run(prisma, ["generate"]); await run(next, ["build"]); }
   else if (command === "install") await dependencies(["install", "--frozen-lockfile"]);
   else if (command === "update") await dependencies(["update"]);
   else if (command === "reset-login") await run(path.join(root, "scripts/reset-admin.mjs"));
@@ -124,5 +137,5 @@ try {
     else if (command === "restart") await supervise();
     else console.log(result?.error || "The Archive is not managed by this launcher yet.");
   } else if (command === "start") await supervise();
-  else throw new Error("Use ./archive start, restart, stop, status, build, install, update, or reset-login.");
+  else throw new Error("Use ./archive setup, start, restart, stop, status, build, install, update, or reset-login.");
 } catch (error) { console.error(error.message); process.exitCode = 1; }

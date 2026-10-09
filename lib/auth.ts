@@ -1,6 +1,7 @@
 import { createHmac, randomBytes, scrypt, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { prisma } from "./prisma";
+import { sessionSecret } from "./session-secret";
 
 export const ADMIN_COOKIE = "archive_admin";
 const derive = promisify(scrypt);
@@ -21,7 +22,9 @@ export async function passwordMatches(password: unknown, hash: string) {
 export async function getAdminAccount() {
   const account = await prisma.adminAccount.findUnique({ where: { id: "admin" } });
   if (account) return account;
-  const passwordHash = await hashPassword(process.env.ADMIN_PASSWORD || "archive2026");
+  const password = process.env.ADMIN_PASSWORD;
+  if (!password || password.length < 8 || password === "set-your-own-password") throw new Error("Configure your own ADMIN_PASSWORD in .env.local before first login.");
+  const passwordHash = await hashPassword(password);
   return prisma.adminAccount.upsert({ where: { id: "admin" }, update: {}, create: { id: "admin", username: process.env.ADMIN_USERNAME || "admin", passwordHash } });
 }
 export async function credentialsMatch(username: unknown, password: unknown) {
@@ -30,12 +33,8 @@ export async function credentialsMatch(username: unknown, password: unknown) {
   return typeof username === "string" && equal(username.trim(), account.username) && validPassword;
 }
 
-function secret() {
-  return process.env.SESSION_SECRET || "archive-local-session-change-this-before-public-exposure";
-}
-
 function signature(value: string) {
-  return createHmac("sha256", secret()).update(value).digest("base64url");
+  return createHmac("sha256", sessionSecret()).update(value).digest("base64url");
 }
 
 export async function createSessionToken() {

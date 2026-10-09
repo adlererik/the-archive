@@ -48,3 +48,13 @@ Personal archive imports and their verification artifacts remain local. They are
 - Graphite replaces warm ambient lighting, surface tints, shadows, and text accents with neutral grays, while retaining black backgrounds and thin gold borders.
 - Central palette variables cover the wall, viewer, favorites, casting controls, and management pages without applying filters to personal media.
 - The palette is remembered per browser and applied before first paint. Theme menus support keyboard operation and stay within compact viewports.
+
+## Public v1.0.0 release
+
+- By Erik Adler: prepared the public MIT-licensed release with source-only ZIP/tarball downloads and checksums.
+- Added a fresh-install setup command that creates an empty database and unique private credentials; removed shared authentication fallbacks and workstation-specific launcher paths.
+- Pinned pnpm and its package-manager lockfile metadata for reproducible setup.
+- Made Debian installers infer their checkout/account, support system Node 24, and preserve the existing production build during rebuilds.
+- Added public setup, operations, migration, security, and release documentation to the repository and Admin Info.
+- Recorded the project owner's confirmation that the Android Chrome/TV casting fix works. Private media and installation records remain outside Git and release assets.
+- Fixed fresh SQLite initialization and launcher controls for long checkout paths discovered during the clean-install verification.

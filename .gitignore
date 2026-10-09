@@ -23,3 +23,9 @@ prisma/*.db*
 *.[mM][oO][vV]
 *.[mM][pP]3
 *.[wW][aA][vV]
+*.pem
+*.key
+*.p12
+*.pfx
+*.bundle
+*.tar.gz

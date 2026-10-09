@@ -2,12 +2,15 @@
   "name": "the-archive",
   "version": "1.0.0",
   "private": true,
+  "license": "MIT",
+  "packageManager": "pnpm@12.10.1",
   "engines": {
     "node": ">=24"
   },
   "scripts": {
     "dev": "ARCHIVE_DEV=true node scripts/server.mjs",
     "build": "prisma generate && next build",
+    "setup:env": "node scripts/setup.mjs",
     "start": "node scripts/site.mjs start",
     "restart": "node scripts/site.mjs restart",
     "db:push": "prisma db push",

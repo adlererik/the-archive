@@ -1,44 +1,64 @@
 # The Archive
 
-By Erik Adler.
+By **Erik Adler** · [MIT license](LICENSE)
 
-A local photo and video preservation suite: an editorial timeline, full-screen media viewer, carousel previews and swipes, individual favorites, photo/video presentations, media-only Google Cast, authenticated administration, and visitor statistics. Built with Next.js, TypeScript, Tailwind, Framer Motion, Lucide, Prisma, and SQLite.
+A self-hosted photo and video gallery with an editorial timeline, carousel previews and swipes, a desktop theater, browser-local favorites, photo/video presentations, media-only Google Cast, authenticated administration, and visitor statistics. Built with Next.js, TypeScript, Tailwind, Framer Motion, Lucide, Prisma, and SQLite.
 
-## Run locally
+## Get started
 
-Requirements: Node.js 24 or newer, pnpm, FFmpeg and FFprobe.
+Linux prerequisites: **Node.js 24+**, **pnpm 12.10.1**, **FFmpeg / FFprobe**, Git, and Bash. Install pnpm with `npm install -g pnpm@12.10.1`; on Debian, install FFmpeg with `sudo apt-get install ffmpeg`. Obtain Node from [nodejs.org](https://nodejs.org/en/download).
 
 ```bash
-cp .env.example .env.local
-# Set your admin password, session secret, and birth date in .env.local.
-./archive install
-pnpm db:push
-./archive build
+git clone https://github.com/adlererik/the-archive.git
+cd the-archive
+./archive setup
 ./archive start
 ```
 
-Open `http://localhost:3000`. The server binds to `0.0.0.0` so devices on the same network can connect. Keep your firewall and router settings appropriate for your chosen access.
+Open [localhost:3000](http://localhost:3000). Setup installs the locked dependencies, creates an **empty** SQLite database, generates a unique admin password and session secret in private `.env.local`, and builds the application. Read your password from that file locally; the initial username is `admin`. Sign in at `/admin/login`, then upload your own photos and videos. Change the username, password, and gallery header in Admin.
 
-Use `./archive stop`, `./archive restart`, and `./archive status` to manage the server. See [operations](docs/OPERATIONS.md) for migration, backups, updates, and boot startup.
+Set `NEXT_PUBLIC_BIRTH_DATE` in `.env.local`, then rebuild to change milestone ages. Setup preserves existing environment files and does not automatically accept destructive database changes. It never includes the author's archive, credentials, or visitor records.
 
-For public HTTPS from the Debian server, [Cloudflare setup](docs/CLOUDFLARE.md) covers the reusable systemd tunnel service, its temporary Quick Tunnel URL, and the one-time switch to a named tunnel for a purchased domain. [Domain research](docs/DOMAINS.md) records registry checks and Cloudflare's official registration and renewal prices.
+Prefer a download? Use the source ZIP or tarball on the [Releases page](https://github.com/adlererik/the-archive/releases). Extract it, install the prerequisites above, then run `./archive setup` and `./archive start` inside the folder. Release checksums are provided.
 
-## Gallery themes
+## Features
 
-Use the Theme button on the wall or Favorites page to choose Gold (the original warm palette) or Graphite (a neutral dark studio palette with thin gold outlines). Gold is the default. The selection is remembered on this browser and applies throughout the site. The black backgrounds and original photo/video colors stay unchanged. Clearing browser storage restores the default.
+- Continuous chronological photo/video wall with carousel previews and touch swipes.
+- Video playback follows the visible media; sound is requested by default, with a discreet mute control. Browsers can require a tap before allowing audio.
+- Gold and Graphite gallery themes; black backgrounds and thin gold outlines remain intact.
+- Favorites for individual images/videos, ordered presentations, and media-only Google Cast.
+- Mobile native video controls without oversized controls covering the picture.
+- Admin upload, caption/date editing, deletion, header customization, and account settings.
+- Local visitor statistics with approximate city/device/browser information, no stored local IPs, and a clear-statistics action.
+- Local Instagram export import, filesystem media streaming, thumbnails, and video processing.
 
-## Data stays outside Git
+## Manage your installation
 
-Personal uploads, thumbnails, playback copies, SQLite databases, visitor records, local environment files, backups, import exports, screenshots, and runtime credentials are excluded by `.gitignore`. A clone contains the application source and documentation. Transfer your database and uploads separately when migrating.
+```bash
+./archive status
+./archive stop
+./archive build
+./archive start
+# Restart an already running launcher:
+./archive restart
+```
 
-Instagram exports are parsed locally by `scripts/import-instagram.ts`; no Instagram credentials are required for export import. Set `INSTAGRAM_EXPORT_DIR` to the extracted export directory and run `pnpm import:instagram`. Use `--latest=5` when selecting the five newest export posts.
+The default listener is `0.0.0.0:3000`. A busy port produces an error instead of silently starting a duplicate site on port 3001. `ARCHIVE_PORT` can override the port explicitly. Keep the start terminal open, or install the Debian systemd service for unattended operation.
 
-## Administration
+See [public setup and deployment](docs/PUBLIC-SETUP.md) for installation, updates, backups, migration, boot startup, and Cloudflare. [Operations](docs/OPERATIONS.md) includes the original installation's examples; replace its account and paths with your own.
 
-Visit `/admin/login`. The initial username comes from `ADMIN_USERNAME`; the initial password comes from `ADMIN_PASSWORD`. Change both through Login settings. Existing database account settings take precedence over environment defaults. `./archive reset-login` provides local account recovery.
+## Casting and mobile playback
 
-The site stores local visitor statistics for its administrator. Public IP city estimates can be unavailable or inaccurate; local IPs are not stored. [Favorites and casting](docs/FAVORITES-CASTING.md) covers presentations, Chrome/HTTPS requirements, and TV-reachable media URLs. [Account management](docs/ADMIN.md) covers login and account recovery.
+Open the sender in a supported Chrome browser over **HTTPS**. The TV must be able to fetch the selected media from that HTTPS URL. The casting fix uses the browser's public origin by default, rather than the server's internal listening address. It refreshes configuration before each load and displays receiver errors. Optional `CAST_MEDIA_ORIGIN` must point to another TV-reachable media host, if used.
 
-## Project notes
+Cast needs a compatible receiver. Photos are prepared as MP4 slides; FFmpeg is required. Browser autoplay restrictions cannot be overridden by the site: if unmuted autoplay is blocked, tap Play or the speaker control once. See [favorites and casting](docs/FAVORITES-CASTING.md).
 
-[Architecture](docs/ARCHITECTURE.md) describes storage, authentication, and streaming. [Development](docs/DEVELOPMENT.md) covers commits and source-only pushes, and [verification notes](docs/VERIFICATION.md) describe completed checks and device checks still needed. Major source changes are committed with Erik Adler as the author. No personal archive content should be added to this repository.
+## Import your own archive
+
+Extract an Instagram export locally, set `INSTAGRAM_EXPORT_DIR` to its directory, then run `pnpm import:instagram`. The importer reads the JSON from disk, fixes common caption encoding problems, preserves dates/carousel order, and copies media into `public/uploads/`. No Instagram credentials are needed. See [architecture](docs/ARCHITECTURE.md).
+
+## Privacy, security, and license
+
+Uploads, thumbnails, playback copies, SQLite databases, environment files, backups, export manifests, screenshots, and runtime credentials are excluded from Git and release packages. Back them up separately. Favorites are saved in each viewer's browser. Visitor statistics belong to the installation's private database; adapt the included `/privacy` notice to your deployment.
+
+Use HTTPS and your own strong credentials before public hosting. See [security guidance](SECURITY.md), [administration](docs/ADMIN.md), [development](docs/DEVELOPMENT.md), and [verification notes](docs/VERIFICATION.md). Application source is MIT licensed; supply only media you have permission to use.

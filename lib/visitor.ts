@@ -1,8 +1,9 @@
 import { createHmac, randomUUID, timingSafeEqual } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { sessionSecret } from "./session-secret";
 
 export const VISITOR_COOKIE = "archive_visitor";
-function sign(value: string) { return createHmac("sha256", process.env.SESSION_SECRET || "archive-local-session-change-this-before-public-exposure").update("visitor:" + value).digest("base64url"); }
+function sign(value: string) { return createHmac("sha256", sessionSecret()).update("visitor:" + value).digest("base64url"); }
 export function visitor(request: NextRequest) {
   const cookie = request.cookies.get(VISITOR_COOKIE)?.value || "";
   const [id, signature] = cookie.split(".");

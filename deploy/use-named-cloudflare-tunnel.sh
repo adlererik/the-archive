@@ -9,7 +9,9 @@ if [ -z "$archive_token" ] || [[ "$archive_token" =~ [[:space:]] ]]; then printf
 umask 077
 printf '%s' "$archive_token" > /etc/the-archive-tunnel/token
 unset archive_token
-chown erik:erik /etc/the-archive-tunnel/token
+archive_user="$(systemctl show the-archive-tunnel -p User --value)"
+getent passwd "$archive_user" >/dev/null
+chown "$archive_user:$(id -gn "$archive_user")" /etc/the-archive-tunnel/token
 chmod 600 /etc/the-archive-tunnel/token
 printf 'TUNNEL_MODE=named\n' > /etc/the-archive-tunnel/tunnel.env
 chmod 644 /etc/the-archive-tunnel/tunnel.env

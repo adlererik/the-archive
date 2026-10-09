@@ -1,12 +1,12 @@
 [Unit]
 Description=The Archive Cloudflare HTTPS tunnel
 Wants=network-online.target
-After=network-online.target the-archive@erik.service
+After=network-online.target the-archive@@ARCHIVE_USER@.service
 StartLimitIntervalSec=0
 
 [Service]
 Type=simple
-User=erik
+User=@ARCHIVE_USER@
 EnvironmentFile=/etc/the-archive-tunnel/tunnel.env
 Environment=HOME=/var/lib/the-archive-tunnel
 WorkingDirectory=/var/lib/the-archive-tunnel

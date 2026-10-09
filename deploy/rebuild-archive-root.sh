@@ -1,27 +1,26 @@
 #!/usr/bin/env bash
 # Erik Adler: rebuild the systemd deployment with a recoverable production build.
 set -euo pipefail
-if [ "$(id -u)" -ne 0 ]; then printf 'Run this deployment with sudo.\n' >&2; exit 1; fi
-archive_project=/home/erik/the-archive
+source "$(dirname "$0")/context.sh" "${1:-}"
 archive_backup="$archive_project/.runtime/build-backups/$(date -u +%Y%m%dT%H%M%SZ)-$$"
 mkdir -p "$archive_backup"
 archive_committed=false
 archive_recover() {
   if [ "$archive_committed" = false ]; then
     if [ -d "$archive_backup/.next" ]; then
-      systemctl stop the-archive@erik
+      systemctl stop "$archive_service"
       if [ -d "$archive_project/.next" ]; then mv "$archive_project/.next" "$archive_backup/failed-build"; fi
       mv "$archive_backup/.next" "$archive_project/.next"
     fi
-    systemctl start the-archive@erik
+    systemctl start "$archive_service"
     printf 'Deployment did not finish. The previous production build was preserved.\n' >&2
   fi
 }
 trap archive_recover EXIT
-systemctl stop the-archive@erik
+systemctl stop "$archive_service"
 if [ -d "$archive_project/.next" ]; then mv "$archive_project/.next" "$archive_backup/.next"; fi
-runuser -u erik -- env NODE_OPTIONS=--max-old-space-size=2304 "$archive_project/archive" build
-systemctl start the-archive@erik
+runuser -u "$archive_user" -- env PATH="$(dirname "$archive_node"):$PATH" NODE_OPTIONS=--max-old-space-size=2304 "$archive_project/archive" build
+systemctl start "$archive_service"
 for archive_attempt in $(seq 1 30); do
   if python3 - <<'PY'
 import urllib.request
@@ -33,12 +32,12 @@ except Exception:
 PY
   then
     archive_committed=true
-    systemctl is-active the-archive@erik
+    systemctl is-active "$archive_service"
     printf 'Deployment complete. Reload the HTTPS page on your phone before casting.\n'
     exit 0
   fi
   sleep 1
 done
 printf 'The new production server did not become ready.\n' >&2
-systemctl stop the-archive@erik
+systemctl stop "$archive_service"
 exit 1

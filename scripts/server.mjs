@@ -9,6 +9,9 @@ const port = Number(process.env.ARCHIVE_PORT || 3000);
 const hostname = process.env.ARCHIVE_HOST || "0.0.0.0";
 const app = next({ dev: process.env.ARCHIVE_DEV === "true", hostname, port });
 await app.prepare();
+// Next loads .env.local during prepare, including on a fresh clone.
+const sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret || sessionSecret.length < 32 || ["replace-with-a-long-random-secret", "archive-local-session-change-this-before-public-exposure"].includes(sessionSecret)) throw new Error("Configure your own SESSION_SECRET in .env.local. Run ./archive setup for a new installation.");
 const { PrismaClient } = await import("@prisma/client");
 const prisma = new PrismaClient();
 // Resolve existing visits locally and remove private addresses during upgrade.
@@ -18,7 +21,7 @@ for (const { ip } of await prisma.visit.groupBy({ by: ["ip"] })) {
 for (const { referrer } of await prisma.visit.groupBy({ by: ["referrer"] })) {
   if (isIP(referrer) && !isPublicAddress(referrer)) await prisma.visit.updateMany({ where: { referrer }, data: { referrer: "Local archive" } });
 }
-const sign = value => createHmac("sha256", process.env.SESSION_SECRET || "archive-local-session-change-this-before-public-exposure").update("visitor:" + value).digest("base64url");
+const sign = value => createHmac("sha256", sessionSecret).update("visitor:" + value).digest("base64url");
 const handle = app.getRequestHandler();
 let lastPrune = 0;
 const server = http.createServer(async (req, res) => {

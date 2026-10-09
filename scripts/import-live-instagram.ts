@@ -60,17 +60,17 @@ async function videoOriginal(slide: Slide, file: string) {
 }
 async function main() {
   const input: LivePost[] = JSON.parse(await readFile(path.resolve(process.argv[2] || "work/instagram-new-posts/collected-posts.json"), "utf8"));
-  if (!Array.isArray(input) || input.length !== 5) throw new Error("Exactly five complete posts are required");
+  if (!Array.isArray(input) || !input.length) throw new Error("A nonempty list of complete posts is required");
   const posts = input.map(post => {
     const url = new URL(post.url);
-    const shortcode = /^\/ellieadlersworld\/p\/([A-Za-z0-9_-]+)\/$/.exec(url.pathname)?.[1];
+    const shortcode = /^\/(?:[A-Za-z0-9_.]+\/)?(?:p|reel)\/([A-Za-z0-9_-]+)\/?$/.exec(url.pathname)?.[1];
     if (url.hostname !== "www.instagram.com" || !shortcode || !post.caption || !post.slides.length || !post.publishedAt?.endsWith("Z") || Number.isNaN(Date.parse(post.publishedAt))) throw new Error("Invalid post metadata");
     for (const [position, slide] of post.slides.entries()) {
       if (slide.style && slide.width) { const offset = Number(/translateX\((\d+)px\)/.exec(slide.style)?.[1]); if (!Number.isFinite(offset) || Math.abs(offset / slide.width - position) > .01) throw new Error("Carousel order mismatch at " + shortcode + " item " + position); }
     }
     return { ...post, shortcode, sourceId: "instagram-live-" + shortcode };
   });
-  if (new Set(posts.map(p => p.sourceId)).size !== 5) throw new Error("Duplicate source posts");
+  if (new Set(posts.map(p => p.sourceId)).size !== posts.length) throw new Error("Duplicate source posts");
   await mkdir(directory, { recursive: true }); await mkdir(staging, { recursive: true });
   const records: { sourceId: string; caption: string; takenAt: Date; mediaItems: { create: { fileName: string; originalName: string; mediaType: MediaType; position: number; thumbnail: string; playbackFile: string | null }[] } }[] = [];
   for (const post of posts) {
@@ -94,7 +94,7 @@ async function main() {
     }
     records.push({ sourceId: post.sourceId, caption: post.caption, takenAt: new Date(post.publishedAt), mediaItems: { create: created } });
   }
-  // Insert only after all five carousels have complete, playable media.
+  // Insert only after all supplied carousels have complete, playable media.
   await prisma.$transaction(records.map(data => prisma.post.create({ data })));
   console.log(JSON.stringify({ imported: records.length, mediaAdded: records.reduce((sum, p) => sum + p.mediaItems.create.length, 0), totalPosts: await prisma.post.count(), totalMedia: await prisma.mediaItem.count() }));
 }
