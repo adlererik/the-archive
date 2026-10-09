@@ -89,6 +89,14 @@ sudo systemctl status the-archive@erik
 
 The service binds to all network interfaces on port 3000, runs as the specified user, restarts after failures, and starts at boot without an SSH login. It reads the project's environment files and uses the server directly, rather than stacking the local launcher and systemd supervisors.
 
+If a minimal Debian installation has no `sudo`, complete the project transfer and build, then sign in as root (or use `su` with the root password) and run:
+
+```bash
+bash /home/erik/the-archive/deploy/setup-debian-root.sh erik
+```
+
+This installs Debian's sudo, FFmpeg/FFprobe, Git, and CA packages; adds `erik` to the standard sudo group; validates sudo configuration; and enables and starts the service. Sudo continues to require the account password. A new SSH session picks up the added group membership.
+
 ```bash
 sudo systemctl stop the-archive@erik
 sudo systemctl start the-archive@erik
@@ -97,3 +105,5 @@ sudo journalctl -u the-archive@erik -n 100 --no-pager
 ```
 
 For updates under systemd, stop the service, back up the database and uploads, pull source, install dependencies, build, and restart with `systemctl`. Avoid `./archive update` or `./archive restart` while systemd owns the server. Check both `systemctl is-enabled the-archive@erik` and `systemctl is-active the-archive@erik` after installation. A reboot check should be done when other work on the server can be interrupted.
+
+Favorites and theme choices live in each browser's storage, tied to the site's address. Moving to a different IP address preserves server media, captions, login settings, hearts, and visitor history, but browser preferences at the old address are not part of the SQLite migration. A source checkout from a private GitHub repository also needs its own repository authentication for future pulls; transfer files or a source-only Git bundle without copying workstation credentials.

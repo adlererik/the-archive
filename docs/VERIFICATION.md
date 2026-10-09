@@ -21,6 +21,10 @@ By Erik Adler. October 9, 2026.
 - Gold and Graphite can be selected from the Theme button. Graphite survives a reload and navigation to Favorites; returning to Gold restores the original accent and warm glow values. A 390px viewport keeps the theme menu inside the screen without horizontal overflow. A 1280px viewport displays four gallery columns. Computed styles confirm a 1px gold card border, the unchanged `#070709` body background, and no image filter in Graphite. Escape closes the picker and returns focus to its button.
 - The Git repository excludes uploads, SQLite databases, environment secrets, local import manifests, visitor information, and verification screenshots.
 
+## Debian migration checks
+
+The source and private archive data were transferred to a Debian 13 server, with a private Node 24.19.0 runtime and lockfile-based dependency installation. Its production build completed with TypeScript checking. The media package checksum matched, SQLite integrity was `ok`, and all 219 posts, 773 media items, and 1,736 referenced files were present. The server served the wall, posts API, and an existing video over port 3000. The final data snapshot was copied after stopping the workstation server. The root setup helper separately installs sudo/FFmpeg/Git and enables the systemd service; those privileged steps require root authentication.
+
 ## Requires real devices
 
 Google Cast discovery and receiver playback require a supported Chrome browser, an HTTPS sender address, and a reachable physical receiver. These have not been verified with a TV. Physical touch swipes and device-specific mobile autoplay should also be checked on the intended phones. The wall provides native video controls and a speaker toggle when a browser blocks unmuted autoplay; the theater also provides a sound fallback.
