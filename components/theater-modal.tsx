@@ -12,6 +12,8 @@ import { FavoriteButton } from "./favorite-button";
 import { CastButton } from "./cast-button";
 import { useCast } from "./cast-provider";
 import { useMediaSwipe } from "@/lib/use-media-swipe";
+import { mediaIsVisible, playVideoWithSound, stopVideo } from "@/lib/video-playback";
+import { useVideoVisibility } from "@/lib/use-video-visibility";
 
 type Props = {
   post: ArchivePost;
@@ -42,38 +44,24 @@ export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevio
   const postIndex = posts.findIndex((entry) => entry.id === post.id);
   const formatted = new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(post.takenAt));
 
+  const resumeVideo = useCallback((video: HTMLVideoElement) => {
+    void playVideoWithSound(video, () => !castingRef.current && videoRef.current === video, setAudioBlocked, () => setPlaybackError("Unable to start this video. Try Play, or open it in your phone’s player below."));
+  }, []);
   const attachVideo = useCallback((video: HTMLVideoElement | null) => {
-    const previous = videoRef.current;
-    if (previous && previous !== video) { previous.pause(); previous.muted = true; }
+    if (videoRef.current !== video) stopVideo(videoRef.current);
     videoRef.current = video;
     if (!video) return;
-    video.muted = false;
-    try { video.volume = 1; } catch { /* Some mobile browsers use device volume only. */ }
-    setVolume(1);
-    setDuration(0);
-    setCurrentTime(0);
-    setPlaybackError("");
-    setAudioBlocked(false);
-    setPlaying(false);
-    if (castingRef.current) { video.pause(); video.muted = true; return; }
-    const start = video.play();
-    void start.then(() => { if (videoRef.current === video) setPlaying(true); }).catch(async (error) => {
-      if (videoRef.current !== video || error.name === "AbortError") return;
-      setPlaying(false);
-      if (error.name === "NotAllowedError") {
-        setAudioBlocked(true);
-        video.muted = true;
-        try { await video.play(); } catch { /* Native controls and the Play button remain available. */ }
-      } else setPlaybackError("Unable to start this video. Try Play, or open it in your phone’s player below.");
-    });
-  }, []);
-
+    setVolume(1); setDuration(0); setCurrentTime(0); setPlaybackError(""); setAudioBlocked(false); setPlaying(false);
+    if (castingRef.current) { stopVideo(video); return; }
+    resumeVideo(video);
+  }, [resumeVideo]);
+  useVideoVisibility(videoRef, media?.id || "", casting || cast.busy, resumeVideo);
   useEffect(() => {
     const active = casting || cast.busy;
-    if (active && videoRef.current) { videoRef.current.pause(); videoRef.current.muted = true; setPlaying(false); }
-    else if (wasCasting.current && videoRef.current) attachVideo(videoRef.current);
+    if (active) { stopVideo(videoRef.current); setPlaying(false); }
+    else if (wasCasting.current && videoRef.current) resumeVideo(videoRef.current);
     wasCasting.current = active;
-  }, [casting, cast.busy, attachVideo]);
+  }, [casting, cast.busy, resumeVideo]);
 
   useEffect(() => {
     if (casting && cast.activeId !== media.id && !cast.busy) void cast.castItems([media]);
@@ -81,9 +69,9 @@ export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevio
 
   const moveCarousel = useCallback((direction: -1 | 1) => {
     const next = mediaIndex + direction;
-    if (next >= post.mediaItems.length) { videoRef.current?.pause(); onClose(); return; }
+    if (next >= post.mediaItems.length) { stopVideo(videoRef.current); onClose(); return; }
     if (next < 0) return;
-    videoRef.current?.pause();
+    stopVideo(videoRef.current);
     flushSync(() => setMediaIndex(next));
   }, [mediaIndex, onClose, post.mediaItems.length]);
 
@@ -116,9 +104,8 @@ export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevio
   function togglePlayback() {
     const video = videoRef.current;
     if (!video) return;
-    video.muted = false;
-    if (video.paused || audioBlocked) void video.play().then(() => { setPlaying(true); setAudioBlocked(false); setPlaybackError(""); }).catch(() => { setPlaying(false); setPlaybackError("The video could not be played. Try your phone’s player below."); });
-    else { video.pause(); setPlaying(false); }
+    if (video.paused || audioBlocked) { setPlaybackError(""); resumeVideo(video); }
+    else { stopVideo(video); setPlaying(false); }
   }
 
   function seek(value: number) {
@@ -142,7 +129,7 @@ export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevio
           <motion.div key={post.id + media.id} initial={{ opacity: 0, scale: .98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .25 }} className="relative mx-auto w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 shadow-2xl">
             <div {...swipe} className="relative flex min-h-[45vh] touch-pan-y items-center justify-center bg-black">
               <CastButton items={[media]} overlay />
-              {isVideo ? <video key={media.id} ref={attachVideo} src={mediaUrl(media.playbackFile || media.fileName)} controls={nativeControls && !casting} poster={media.thumbnail ? mediaUrl(media.thumbnail) : undefined} preload="auto" playsInline className="max-h-[70vh] w-full object-contain" onPlay={event => { if (castingRef.current) { event.currentTarget.pause(); event.currentTarget.muted = true; } else setPlaying(true); }} onPause={() => setPlaying(false)} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)} onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)} onEnded={() => setPlaying(false)} onVolumeChange={event => { if (!event.currentTarget.muted) setAudioBlocked(false); }} onError={() => { setPlaying(false); setPlaybackError("Unable to load this video. Try opening it in your phone’s player below."); }} /> : <img src={mediaUrl(media.fileName)} alt="Expanded archive memory" draggable={false} className="max-h-[72vh] w-full object-contain" />}
+              {isVideo ? <video key={media.id} ref={attachVideo} src={mediaUrl(media.playbackFile || media.fileName)} controls={nativeControls && !casting} poster={media.thumbnail ? mediaUrl(media.thumbnail) : undefined} preload="auto" playsInline className="max-h-[70vh] w-full object-contain" onPlay={event => { if (castingRef.current || !mediaIsVisible(event.currentTarget)) stopVideo(event.currentTarget); else setPlaying(true); }} onPause={() => setPlaying(false)} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)} onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)} onEnded={() => setPlaying(false)} onVolumeChange={event => { if (!event.currentTarget.muted) setAudioBlocked(false); }} onError={() => { setPlaying(false); setPlaybackError("Unable to load this video. Try opening it in your phone’s player below."); }} /> : <img src={mediaUrl(media.fileName)} alt="Expanded archive memory" draggable={false} className="max-h-[72vh] w-full object-contain" />}
               {post.mediaItems.length > 1 ? <>
                 {!nativeControls ? <button disabled={mediaIndex === 0} onClick={() => moveCarousel(-1)} className="absolute left-6 hidden h-20 w-20 place-items-center rounded-full border border-white/35 bg-black/65 text-white backdrop-blur-md hover:border-[#d4af37] disabled:opacity-25 sm:grid" aria-label="Previous carousel item"><ChevronLeft className="h-10 w-10" /></button> : null}
                 {!nativeControls ? <button onClick={() => moveCarousel(1)} title={mediaIndex === post.mediaItems.length - 1 ? "Return to the wall" : "Next item"} className="absolute right-6 hidden h-20 w-20 place-items-center rounded-full border border-white/35 bg-black/65 text-white backdrop-blur-md hover:border-[#d4af37] sm:grid" aria-label="Next carousel item"><ChevronRight className="h-10 w-10" /></button> : null}

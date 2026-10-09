@@ -45,12 +45,9 @@ button { -webkit-tap-highlight-color: transparent; }
 
 .archive-card { content-visibility: auto; contain-intrinsic-size: auto 620px; }
 .archive-card:hover, .archive-card:focus-within { content-visibility: visible; }
-.carousel-controls { opacity: 0; transition: opacity .2s ease; }
-.archive-card:hover .carousel-controls, .archive-card:focus-within .carousel-controls { opacity: 1; }
 .carousel-tray { visibility: hidden; opacity: 0; transform: translateY(-8px); transition: opacity .2s ease, transform .2s ease, visibility .2s; }
 .archive-card:hover .carousel-tray, .archive-card:focus-within .carousel-tray { visibility: visible; opacity: 1; transform: translateY(0); }
 @media (hover: none) {
-  .carousel-controls { opacity: 1; }
   .carousel-tray { position: relative; top: auto; visibility: visible; opacity: 1; transform: none; }
 }
 

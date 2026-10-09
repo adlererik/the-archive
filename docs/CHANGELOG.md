@@ -18,3 +18,10 @@ Personal archive imports and their verification artifacts remain local. They are
 - Corrected swipe direction consistently: left advances, right goes back.
 - Added horizontal carousel swipes and mouse drags directly on wall previews, preserving vertical scrolling and preventing accidental theater opening after a swipe.
 - Placed compact Cast icons over the upper-right corner of media in the wall, theater, and favorites viewer. Wall casting follows the selected carousel preview and silences local hover playback.
+
+## Visible video playback update
+
+- Removed the wall's left/right arrow overlays; swipes and thumbnail selection remain available.
+- Replaced mouse-only preview playback and unconditional scroll stopping with one visibility-managed wall player, including touch-device viewing and carousel selection.
+- Shared local video ownership prevents overlapping audio and stops stale playback requests after media changes.
+- Theater and favorites videos pause when scrolled out of view or when their tab loses visibility, and resume when visible again. Unmuted autoplay is attempted first, with a browser-policy fallback for sound.
