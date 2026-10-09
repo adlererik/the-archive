@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Erik Adler: one service runner for temporary and account-owned tunnels.
+set -euo pipefail
+case "${TUNNEL_MODE:-quick}" in
+  quick)
+    exec /usr/local/bin/cloudflared tunnel --no-autoupdate --url http://127.0.0.1:3000
+    ;;
+  named)
+    exec /usr/local/bin/cloudflared tunnel --no-autoupdate run --token-file /etc/the-archive-tunnel/token
+    ;;
+  *) printf 'Unsupported TUNNEL_MODE. Use quick or named.\n' >&2; exit 1 ;;
+esac

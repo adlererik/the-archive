@@ -1,0 +1,25 @@
+[Unit]
+Description=The Archive Cloudflare HTTPS tunnel
+Wants=network-online.target
+After=network-online.target the-archive@erik.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=erik
+EnvironmentFile=/etc/the-archive-tunnel/tunnel.env
+Environment=HOME=/var/lib/the-archive-tunnel
+WorkingDirectory=/var/lib/the-archive-tunnel
+StateDirectory=the-archive-tunnel
+ExecStart=/usr/local/libexec/the-archive-tunnel-run
+Restart=always
+RestartSec=5
+TimeoutStopSec=20
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

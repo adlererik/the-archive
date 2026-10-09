@@ -21,6 +21,8 @@ Open `http://localhost:3000`. The server binds to `0.0.0.0` so devices on the sa
 
 Use `./archive stop`, `./archive restart`, and `./archive status` to manage the server. See [operations](docs/OPERATIONS.md) for migration, backups, updates, and boot startup.
 
+For public HTTPS from the Debian server, [Cloudflare setup](docs/CLOUDFLARE.md) covers the reusable systemd tunnel service, its temporary Quick Tunnel URL, and the one-time switch to a named tunnel for a purchased domain. [Domain research](docs/DOMAINS.md) records registry checks and Cloudflare's official registration and renewal prices.
+
 ## Gallery themes
 
 Use the Theme button on the wall or Favorites page to choose Gold (the original warm palette) or Graphite (a neutral dark studio palette with thin gold outlines). Gold is the default. The selection is remembered on this browser and applies throughout the site. The black backgrounds and original photo/video colors stay unchanged. Clearing browser storage restores the default.

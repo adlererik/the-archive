@@ -2,6 +2,8 @@
 
 By Erik Adler.
 
+For the Debian server's public HTTPS connector, domain purchasing, and custom-hostname setup, see [Cloudflare operations](CLOUDFLARE.md). The tunnel has its own systemd service; application restarts and updates do not require reinstalling it.
+
 ## Start, stop, restart
 
 Run these commands from the project directory:
