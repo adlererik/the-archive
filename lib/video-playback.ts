@@ -1,7 +1,10 @@
 "use client";
 
+import { soundIsEnabled, subscribeSound } from "./sound-preference";
+
 let owner: HTMLVideoElement | null = null;
 const attempts = new WeakMap<HTMLVideoElement, number>();
+subscribeSound(() => { if (owner) owner.muted = !soundIsEnabled(); });
 
 export function mediaIsVisible(video: HTMLElement) {
   const rect = video.getBoundingClientRect();
@@ -24,7 +27,7 @@ export async function playVideoWithSound(video: HTMLVideoElement, allowed: () =>
   owner = video;
   const attempt = (attempts.get(video) || 0) + 1; attempts.set(video, attempt);
   const current = () => owner === video && attempts.get(video) === attempt && allowed() && mediaIsVisible(video);
-  video.muted = false;
+  video.muted = !soundIsEnabled();
   try { video.volume = 1; } catch { /* Mobile browsers may use device volume only. */ }
   try {
     await video.play();
@@ -32,7 +35,7 @@ export async function playVideoWithSound(video: HTMLVideoElement, allowed: () =>
   } catch (error) {
     if (!current() || !(error instanceof Error) || error.name === "AbortError") return;
     if (error.name === "NotAllowedError") {
-      blocked(true); video.muted = true;
+      blocked(soundIsEnabled()); video.muted = true;
       try { await video.play(); } catch (fallback) { if (current() && fallback instanceof Error && fallback.name !== "AbortError") failed?.(fallback); }
     } else failed?.(error);
   } finally {

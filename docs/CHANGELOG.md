@@ -25,3 +25,10 @@ Personal archive imports and their verification artifacts remain local. They are
 - Replaced mouse-only preview playback and unconditional scroll stopping with one visibility-managed wall player, including touch-device viewing and carousel selection.
 - Shared local video ownership prevents overlapping audio and stops stale playback requests after media changes.
 - Theater and favorites videos pause when scrolled out of view or when their tab loses visibility, and resume when visible again. Unmuted autoplay is attempted first, with a browser-policy fallback for sound.
+
+## Desktop viewing and discreet sound controls
+
+- Removed the wall's “Click to view” label and sound text banners.
+- Desktop cards remain accessible theater-opening buttons; touch and compact layouts render inline media with native video controls and no theater-opening target.
+- Added a transparent speaker toggle with accessible mute/unmute labels. Sound starts enabled on a fresh load, and explicit mute persists through scrolling, swipes, and local media changes for the visit.
+- Audio retry gestures respect explicit mute and exclude the speaker toggle itself, so its action does not immediately reverse.
