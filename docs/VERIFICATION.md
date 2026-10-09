@@ -9,6 +9,8 @@ By Erik Adler. October 9, 2026.
 - A timed photo advances to the next video; the video plays unmuted and completes the presentation. Pause/resume and native video controls remain available.
 - A 390px mobile viewport has no horizontal overflow. Video playback uses native controls, with carousel and presentation navigation below the media.
 - Carousel previous is disabled at the first item. Next and keyboard navigation advance through the carousel, then close it after the final item.
+- After the swipe correction, horizontal pointer drags were checked in a 390px viewport: left advances and right goes back on both the wall and theater. Wall drags do not open the theater, and advancing past the theater's last item closes it. The shared gesture handler also accepts touch pointers; physical phone gestures still need a device check.
+- The Cast control is a compact 44px overlay in the upper-right corner of wall and viewer media. It has no text pill covering the media.
 - The favorites API preserves the requested order. Cast photo preparation produces a silent H.264 MP4 with the requested duration.
 - Cast photo streaming supports HEAD, byte ranges, and CORS. Upload video streaming accepts CORS Range preflight requests.
 - Admin Info displays the documentation included with the source repository.

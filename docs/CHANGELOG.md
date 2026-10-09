@@ -12,3 +12,9 @@ By Erik Adler.
 - Added deployment, migration, boot startup, account, favorites, and Cast documentation that is available from the admin Info panel and included with the source repository.
 
 Personal archive imports and their verification artifacts remain local. They are not included in Git.
+
+## Carousel and Cast control update
+
+- Corrected swipe direction consistently: left advances, right goes back.
+- Added horizontal carousel swipes and mouse drags directly on wall previews, preserving vertical scrolling and preventing accidental theater opening after a swipe.
+- Placed compact Cast icons over the upper-right corner of media in the wall, theater, and favorites viewer. Wall casting follows the selected carousel preview and silences local hover playback.

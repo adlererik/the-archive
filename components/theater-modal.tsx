@@ -11,6 +11,7 @@ import { useModal } from "@/lib/use-modal";
 import { FavoriteButton } from "./favorite-button";
 import { CastButton } from "./cast-button";
 import { useCast } from "./cast-provider";
+import { useMediaSwipe } from "@/lib/use-media-swipe";
 
 type Props = {
   post: ArchivePost;
@@ -36,7 +37,6 @@ export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevio
   const [volume, setVolume] = useState(1);
   const [playbackError, setPlaybackError] = useState("");
   const videoRef = useRef<HTMLVideoElement>(null);
-  const swipeStart = useRef<{ x: number; y: number; at: number } | null>(null);
   const media = post.mediaItems[mediaIndex];
   const isVideo = media?.mediaType === "VIDEO";
   const postIndex = posts.findIndex((entry) => entry.id === post.id);
@@ -87,6 +87,13 @@ export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevio
     flushSync(() => setMediaIndex(next));
   }, [mediaIndex, onClose, post.mediaItems.length]);
 
+  const swipe = useMediaSwipe({
+    enabled: post.mediaItems.length > 1,
+    onPrevious: () => moveCarousel(-1),
+    onNext: () => moveCarousel(1),
+    canStart: event => !(event.target as HTMLElement).closest("button, input") && !(isVideo && nativeControls && event.clientY > (videoRef.current?.getBoundingClientRect().bottom || event.currentTarget.getBoundingClientRect().bottom) - 80),
+  });
+
   useEffect(() => {
     const query = window.matchMedia("(max-width: 639px), (pointer: coarse)");
     const update = () => setNativeControls(query.matches);
@@ -133,19 +140,9 @@ export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevio
         <button onClick={onClose} className="fixed right-5 top-5 z-[60] flex min-h-12 items-center gap-2 rounded-full border border-white/35 bg-black/80 px-5 text-sm font-bold tracking-[0.15em] text-white backdrop-blur-md hover:border-[#d4af37] sm:right-8 sm:top-8"><span>CLOSE</span><X className="h-5 w-5" /></button>
         <div className="mx-auto flex min-h-[calc(100dvh-2.5rem)] max-w-6xl flex-col justify-center py-16 sm:min-h-[calc(100dvh-4rem)]">
           <motion.div key={post.id + media.id} initial={{ opacity: 0, scale: .98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .25 }} className="relative mx-auto w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 shadow-2xl">
-            <div className="relative flex min-h-[45vh] items-center justify-center bg-black" onTouchStart={event => {
-              swipeStart.current = null;
-              if (event.touches.length !== 1 || (event.target as HTMLElement).closest("button, input")) return;
-              const point = event.touches[0]; const rect = event.currentTarget.getBoundingClientRect();
-              if (isVideo && point.clientY > (videoRef.current?.getBoundingClientRect().bottom || rect.bottom) - 80) return;
-              swipeStart.current = { x: point.clientX, y: point.clientY, at: Date.now() };
-            }} onTouchEnd={event => {
-              const start = swipeStart.current; swipeStart.current = null; const point = event.changedTouches[0];
-              if (!start || !point || Date.now() - start.at > 1000 || post.mediaItems.length < 2) return;
-              const dx = point.clientX - start.x; const dy = point.clientY - start.y;
-              if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) moveCarousel(dx < 0 ? -1 : 1);
-            }} onTouchCancel={() => { swipeStart.current = null; }}>
-              {isVideo ? <video key={media.id} ref={attachVideo} src={mediaUrl(media.playbackFile || media.fileName)} controls={nativeControls && !casting} poster={media.thumbnail ? mediaUrl(media.thumbnail) : undefined} preload="auto" playsInline className="max-h-[70vh] w-full object-contain" onPlay={event => { if (castingRef.current) { event.currentTarget.pause(); event.currentTarget.muted = true; } else setPlaying(true); }} onPause={() => setPlaying(false)} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)} onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)} onEnded={() => setPlaying(false)} onVolumeChange={event => { if (!event.currentTarget.muted) setAudioBlocked(false); }} onError={() => { setPlaying(false); setPlaybackError("Unable to load this video. Try opening it in your phone’s player below."); }} /> : <img src={mediaUrl(media.fileName)} alt="Expanded archive memory" className="max-h-[72vh] w-full object-contain" />}
+            <div {...swipe} className="relative flex min-h-[45vh] touch-pan-y items-center justify-center bg-black">
+              <CastButton items={[media]} overlay />
+              {isVideo ? <video key={media.id} ref={attachVideo} src={mediaUrl(media.playbackFile || media.fileName)} controls={nativeControls && !casting} poster={media.thumbnail ? mediaUrl(media.thumbnail) : undefined} preload="auto" playsInline className="max-h-[70vh] w-full object-contain" onPlay={event => { if (castingRef.current) { event.currentTarget.pause(); event.currentTarget.muted = true; } else setPlaying(true); }} onPause={() => setPlaying(false)} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)} onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)} onEnded={() => setPlaying(false)} onVolumeChange={event => { if (!event.currentTarget.muted) setAudioBlocked(false); }} onError={() => { setPlaying(false); setPlaybackError("Unable to load this video. Try opening it in your phone’s player below."); }} /> : <img src={mediaUrl(media.fileName)} alt="Expanded archive memory" draggable={false} className="max-h-[72vh] w-full object-contain" />}
               {post.mediaItems.length > 1 ? <>
                 {!nativeControls ? <button disabled={mediaIndex === 0} onClick={() => moveCarousel(-1)} className="absolute left-6 hidden h-20 w-20 place-items-center rounded-full border border-white/35 bg-black/65 text-white backdrop-blur-md hover:border-[#d4af37] disabled:opacity-25 sm:grid" aria-label="Previous carousel item"><ChevronLeft className="h-10 w-10" /></button> : null}
                 {!nativeControls ? <button onClick={() => moveCarousel(1)} title={mediaIndex === post.mediaItems.length - 1 ? "Return to the wall" : "Next item"} className="absolute right-6 hidden h-20 w-20 place-items-center rounded-full border border-white/35 bg-black/65 text-white backdrop-blur-md hover:border-[#d4af37] sm:grid" aria-label="Next carousel item"><ChevronRight className="h-10 w-10" /></button> : null}
@@ -170,7 +167,7 @@ export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevio
           </motion.div>
 
           <div className="mx-auto w-full max-w-5xl px-1 pt-8 sm:pt-10">
-            <div className="mb-5 flex flex-wrap items-center gap-3"><FavoriteButton mediaId={media.id} /><CastButton items={[media]} />{post.mediaItems.length > 1 ? <p className="text-xs text-white/50">Swipe left for the previous item; right for the next. After the final item, return to the wall.</p> : null}</div>
+            <div className="mb-5 flex flex-wrap items-center gap-3"><FavoriteButton mediaId={media.id} />{post.mediaItems.length > 1 ? <p className="text-xs text-white/50">Swipe left for the next item; right for the previous. After the final item, return to the wall.</p> : null}</div>
             <p className="font-editorial text-[26px] leading-tight text-[#f9f5e9] sm:text-4xl">{formatted} <span className="font-sans text-base text-[#d4af37] sm:text-lg">• Age {ageAt(post.takenAt)}</span></p>
             {post.caption ? <p className="mt-5 max-w-4xl whitespace-pre-wrap text-2xl leading-relaxed text-white/90">{post.caption}</p> : null}
             <div className="mt-10 flex justify-between gap-4 border-t border-white/10 pt-5">

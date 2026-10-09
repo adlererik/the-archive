@@ -14,13 +14,13 @@ Choose a photo duration and optional Repeat presentation, then press Play presen
 
 ## Carousel navigation
 
-As requested, swiping left selects the previous item and swiping right selects the next. Swiping forward after the final item closes the viewer and returns to its card. Previous at the first item does not wrap. Keyboard arrow keys and carousel buttons use the same previous/next behavior. The Newer/Older controls still switch between posts.
+Swipe left to advance to the next item and swipe right to return to the previous item. The wall carousel previews, theater, and favorites viewer use the same direction. Wall previews wrap at their ends and stay on the wall; vertical gestures continue scrolling the page. A swipe does not open the theater. Swiping forward after the final item closes the viewer and returns to its card. Previous at the first item does not wrap. Keyboard arrow keys and carousel buttons use the same previous/next behavior. The Newer/Older controls still switch between posts.
 
 ## Google Cast
 
-Open a photo or video and use its Cast icon. Available devices make the icon gold; otherwise tapping the dim icon explains what is missing. Choose your Chromecast or Google Cast-enabled TV. The receiver loads the media from your archive. This application never requests tab, screen, or desktop mirroring, and never casts its page, admin controls, favorites grid, or captions.
+Open a photo or video and use its Cast icon. The Cast icon is overlaid in the upper-right corner of photos and videos, including wall previews. It casts the currently selected item without opening the theater. A white icon indicates availability, gold indicates an active cast; otherwise tapping the dim icon explains what is missing. Choose your Chromecast or Google Cast-enabled TV. The receiver loads the media from your archive. This application never requests tab, screen, or desktop mirroring, and never casts its page, admin controls, favorites grid, or captions.
 
-While a single item is cast, changing the selected carousel item updates the TV. Local video playback pauses to avoid duplicate audio. Pause/Play on TV and Stop casting control the receiver.
+While a single item is cast, changing the selected carousel item in the same card or viewer updates the TV. Tap the active overlay for the Stop casting option, or use the persistent casting controls. Local video playback pauses to avoid duplicate audio. Pause/Play on TV and Stop casting control the receiver.
 
 Use Cast presentation from Favorites or inside the presentation viewer to send the ordered favorites queue. The TV advances through complete videos and timed photo slides, with the selected repeat setting. The queue runs on the receiver; it does not depend on phone slideshow timers. Closing the local viewer does not stop the TV queue; use Stop casting to end it.
 
