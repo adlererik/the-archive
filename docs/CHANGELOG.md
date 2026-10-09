@@ -32,3 +32,10 @@ Personal archive imports and their verification artifacts remain local. They are
 - Desktop cards remain accessible theater-opening buttons; touch and compact layouts render inline media with native video controls and no theater-opening target.
 - Added a transparent speaker toggle with accessible mute/unmute labels. Sound starts enabled on a fresh load, and explicit mute persists through scrolling, swipes, and local media changes for the visit.
 - Audio retry gestures respect explicit mute and exclude the speaker toggle itself, so its action does not immediately reverse.
+
+## Wall audio recovery and continuous video playback
+
+- By Erik Adler: reuse one wall video element across cards and carousel items to retain playback permission after a user gesture.
+- Retry requested audio from click, touch-end, pointer-up, and keyboard interactions instead of relying on pointer-down.
+- Prioritize a newly selected carousel video immediately, and ignore stale playback promises when the shared player changes sources.
+- Keep the speaker in its default sound-on state when a browser blocks audio; a tiny gold dot indicates a tap is required. Explicit mute is still respected.

@@ -14,8 +14,9 @@ import { useMediaSwipe } from "@/lib/use-media-swipe";
 import { useWallPlayback } from "@/lib/use-wall-playback";
 import { playVideoWithSound, stopVideo } from "@/lib/video-playback";
 import { flushSync } from "react-dom";
-import { setSoundEnabled, soundIsEnabled, useSoundPreference } from "@/lib/sound-preference";
+import { setSoundEnabled, useSoundPreference } from "@/lib/sound-preference";
 import { useDesktopMedia } from "@/lib/use-desktop-media";
+import { WallVideo } from "./wall-video";
 
 type Props = { post: ArchivePost; isAdmin: boolean; theaterOpen: boolean; onOpen: (mediaIndex: number) => void; onEdit: () => void };
 
@@ -44,7 +45,7 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
     stopVideo(videoRef.current);
     setAudioBlocked(false);
   }, []);
-  const { active: hovering, hover } = useWallPlayback(surface, !playbackDisabled.current, isVideo, stopPreview);
+  const { active: hovering, hover, activate } = useWallPlayback(surface, !playbackDisabled.current, isVideo, stopPreview);
   previewActive.current = hovering && !playbackDisabled.current;
 
   useEffect(() => {
@@ -60,22 +61,19 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
     videoRef.current = video;
     if (video && previewActive.current) void playWithSound(video);
   }, [playWithSound]);
+  const guardPlayback = useCallback((video: HTMLVideoElement) => { if (!previewActive.current || playbackDisabled.current) stopVideo(video); }, []);
+  const audioRecovered = useCallback(() => setAudioBlocked(false), []);
 
   useEffect(() => { if (playbackDisabled.current) stopPreview(); }, [theaterOpen, cast.connected, cast.busy, stopPreview]);
   useEffect(() => { if (!theaterOpen && castingThisCard && item && cast.activeId !== item.id && !cast.busy) void cast.castItems([item]); }, [theaterOpen, castingThisCard, item, cast.activeId, cast.busy, cast.castItems]);
-  useEffect(() => {
-    if (!hovering) return;
-    const retryAudio = (event: Event) => { if ((event.target as Element)?.closest?.("[data-sound-toggle]")) return; if (soundIsEnabled() && previewActive.current && videoRef.current?.muted) void playWithSound(videoRef.current); };
-    window.addEventListener("pointerdown", retryAudio, true); window.addEventListener("keydown", retryAudio, true);
-    return () => { window.removeEventListener("pointerdown", retryAudio, true); window.removeEventListener("keydown", retryAudio, true); };
-  }, [hovering, playWithSound]);
 
   function choosePreview(index: number) {
     manualPreview.current = true;
-    if (index === preview) { if (videoRef.current) void playWithSound(videoRef.current); return; }
+    if (index === preview) { flushSync(activate); if (videoRef.current) void playWithSound(videoRef.current); return; }
     stopVideo(videoRef.current);
     // Keep swipe activation alive while the newly selected video mounts.
-    flushSync(() => setPreview(index));
+    flushSync(() => { setPreview(index); activate(); });
+    if (videoRef.current) void playWithSound(videoRef.current);
   }
   function movePreview(delta: number) { choosePreview((preview + delta + post.mediaItems.length) % post.mediaItems.length); }
   function toggleSound() {
@@ -97,7 +95,7 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
 
   const mediaPreview = <>
     {inWindow ? isVideo && hovering && !theaterOpen ? (
-      <video key={item.id} ref={attachVideo} src={mediaUrl(item.playbackFile || item.fileName)} poster={item.thumbnail ? mediaUrl(item.thumbnail) : undefined} controls={!desktop} preload="metadata" playsInline loop onPlay={(event) => { if (!previewActive.current || playbackDisabled.current) stopVideo(event.currentTarget); }} className={desktop ? "h-full w-full object-cover" : "h-full w-full object-contain"} />
+      <WallVideo src={mediaUrl(item.playbackFile || item.fileName)} poster={item.thumbnail ? mediaUrl(item.thumbnail) : undefined} desktop={desktop} attach={attachVideo} onPlay={guardPlayback} onAudible={audioRecovered} />
     ) : isVideo && !item.thumbnail ? (
       <div className="grid h-full place-items-center bg-gradient-to-br from-zinc-900 to-black"><Play className="h-14 w-14 text-[#d4af37]" /></div>
     ) : <img src={mediaUrl(item.thumbnail || item.fileName)} alt="Archive memory" draggable={false} loading="lazy" decoding="async" className="h-full w-full object-cover" /> : <div className="h-full w-full bg-gradient-to-br from-zinc-900 to-black" />}
@@ -117,7 +115,7 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
           {carousel ? <span className="flex items-center gap-1.5 rounded-full border border-[#d4af37]/35 bg-black/65 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f1cf76] backdrop-blur-md transition-transform group-hover:scale-110"><Images className="h-3 w-3" /> {preview + 1} / {post.mediaItems.length}</span> : null}
         </div>
 
-        {isVideo && !theaterOpen ? <button data-sound-toggle onClick={event => { event.stopPropagation(); toggleSound(); }} aria-label={soundEnabled && !audioBlocked ? "Mute sound" : "Unmute sound"} aria-pressed={soundEnabled && !audioBlocked} title={audioBlocked ? "Tap to allow sound" : soundEnabled ? "Mute sound" : "Unmute sound"} className="absolute right-3 top-16 z-20 grid h-11 w-11 place-items-center rounded-md bg-transparent text-white/70 drop-shadow-[0_1px_3px_rgba(0,0,0,.9)] transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">{soundEnabled && !audioBlocked ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}</button> : null}
+        {isVideo && !theaterOpen ? <button data-sound-toggle onClick={event => { event.stopPropagation(); toggleSound(); }} aria-label={audioBlocked && soundEnabled ? "Allow sound" : soundEnabled ? "Mute sound" : "Unmute sound"} aria-pressed={soundEnabled} title={audioBlocked && soundEnabled ? "Your browser requires a tap to allow sound" : soundEnabled ? "Mute sound" : "Unmute sound"} className="absolute right-3 top-16 z-20 grid h-11 w-11 place-items-center rounded-md bg-transparent text-white/70 drop-shadow-[0_1px_3px_rgba(0,0,0,.9)] transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">{soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}{audioBlocked && soundEnabled ? <span className="absolute right-2 top-2 h-1 w-1 rounded-full bg-[#d4af37]" /> : null}</button> : null}
         {isAdmin ? <button onClick={onEdit} className="absolute bottom-3 right-3 z-30 flex items-center gap-1 rounded-full border border-white/15 bg-black/70 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white backdrop-blur-md hover:border-[#d4af37]/60"><Pencil className="h-3 w-3" /> Edit</button> : null}
       </div>
       {carousel ? <div className="carousel-tray absolute inset-x-0 top-full z-20 rounded-b-2xl border border-[#d4af37]/40 bg-[#101014]/95 p-3 shadow-gold backdrop-blur-xl" aria-label="Carousel thumbnails">

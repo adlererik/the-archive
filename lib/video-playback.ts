@@ -4,7 +4,21 @@ import { soundIsEnabled, subscribeSound } from "./sound-preference";
 
 let owner: HTMLVideoElement | null = null;
 const attempts = new WeakMap<HTMLVideoElement, number>();
+let interactionListeners = false;
+let resumeOwner: (() => void) | null = null;
 subscribeSound(() => { if (owner) owner.muted = !soundIsEnabled(); });
+
+// Erik Adler: touch-end and click are accepted audio gestures on mobile; pointer-down alone is not.
+function listenForAudioInteraction() {
+  if (interactionListeners) return;
+  interactionListeners = true;
+  const retry = (event: Event) => {
+    if (!event.isTrusted || !soundIsEnabled() || !owner?.muted || !mediaIsVisible(owner)) return;
+    if ((event.target as Element)?.closest?.("[data-sound-toggle]")) return;
+    resumeOwner?.();
+  };
+  for (const type of ["click", "touchend", "pointerup", "keydown"]) window.addEventListener(type, retry);
+}
 
 export function mediaIsVisible(video: HTMLElement) {
   const rect = video.getBoundingClientRect();
@@ -17,7 +31,7 @@ export function stopVideo(video: HTMLVideoElement | null) {
   if (!video) return;
   attempts.set(video, (attempts.get(video) || 0) + 1);
   video.pause(); video.muted = true;
-  if (owner === video) owner = null;
+  if (owner === video) { owner = null; resumeOwner = null; }
 }
 
 // Erik Adler: pause the old owner before starting another video, including late play promises.
@@ -25,6 +39,8 @@ export async function playVideoWithSound(video: HTMLVideoElement, allowed: () =>
   if (!allowed() || !mediaIsVisible(video)) { stopVideo(video); return; }
   if (owner && owner !== video) stopVideo(owner);
   owner = video;
+  listenForAudioInteraction();
+  resumeOwner = () => { void playVideoWithSound(video, allowed, blocked, failed); };
   const attempt = (attempts.get(video) || 0) + 1; attempts.set(video, attempt);
   const current = () => owner === video && attempts.get(video) === attempt && allowed() && mediaIsVisible(video);
   video.muted = !soundIsEnabled();
@@ -39,6 +55,8 @@ export async function playVideoWithSound(video: HTMLVideoElement, allowed: () =>
       try { await video.play(); } catch (fallback) { if (current() && fallback instanceof Error && fallback.name !== "AbortError") failed?.(fallback); }
     } else failed?.(error);
   } finally {
+    // A newer source may already be playing on the reused wall element.
+    if (attempts.get(video) !== attempt) return;
     if (owner !== video || !allowed() || !mediaIsVisible(video)) { video.pause(); video.muted = true; }
   }
 }
