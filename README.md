@@ -2,7 +2,7 @@
 
 ### A self-hosted Instagram replacement for your photos, videos, and memories
 
-By **Erik Adler** · **v1.1.0** · [MIT license](LICENSE)
+By **Erik Adler** · Latest release **v1.1.0** · Current features on **main** · [MIT license](LICENSE)
 
 Publish your own photo and video collection on a website you control. The Archive combines an Instagram-style chronological wall with a cinematic gallery, fast thumbnail browsing, favorites, presentations, and Google Cast. Your original media and database live on your own computer or server.
 
@@ -32,7 +32,9 @@ It focuses on personal galleries and media preservation: viewers can browse memo
 | Personal favorites | Save individual carousel photos/videos, reorder them, and build a presentation. |
 | TV presentations | Timed photos and complete videos, optional repeat, receiver-side queues, and play/pause/stop controls. |
 | Hearts | Visitors can like a whole post separately from saving individual favorites. |
-| Gold / Graphite themes | Warm editorial styling or a dark studio palette, with black backgrounds and thin gold borders. |
+| Five gallery themes | Gold (default), Graphite, Porcelain (light), Midnight, and Verdant, with original media colors and restrained gold hairlines. |
+| Carousel curation | Reorder, add, or remove individual assets; turn single posts into carousels; insert at any timestamp. |
+| Post soundtracks | Audio uploads, preview, trim, volume, loop, original-video audio settings, and soundtrack-bearing cast files. |
 | Built-in CMS | Drag-and-drop uploads, multi-file carousels, backdated memories, and inline caption/date editing. |
 | Custom header and login | Change the title, introductory text, username, and password from Admin. |
 | Visitor statistics | Approximate city/country, device, OS/browser, and counts, with a clear-all action. |
@@ -45,10 +47,12 @@ See [all features and their limits](docs/FEATURES.md).
 
 ## Quick installation
 
+These commands install current **main**, including carousel editing and soundtracks. The v1.1.0 release download remains the earlier stable snapshot; choose its release notes if installing that tag.
+
 Supported starting point: **Linux**, **Node.js 24+**, **pnpm 12.10.1**, **FFmpeg / FFprobe**, **Git**, and **Bash**. The beginner guide includes copy-and-paste Debian/Ubuntu prerequisite commands.
 
 ```bash
-git clone --branch v1.1.0 https://github.com/adlererik/the-archive.git
+git clone --branch main https://github.com/adlererik/the-archive.git
 cd the-archive
 ./archive setup
 ./archive start

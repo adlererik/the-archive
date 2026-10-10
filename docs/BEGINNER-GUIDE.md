@@ -1,6 +1,6 @@
 # Beginner guide: run your own Archive
 
-By Erik Adler. Version 1.1.0.
+By Erik Adler. Current main source; latest tagged release: v1.1.0.
 
 This is your own Instagram-style photo/video website. Your computer or server stores the files and runs the CMS. A computer must stay powered on for other people to reach it. Start locally, add a few memories, then give it a public HTTPS address.
 
@@ -19,7 +19,7 @@ Sudo may ask for your computer/server password. Typing it shows no characters; p
 
 ```bash
 cd ~
-git clone --branch v1.1.0 https://github.com/adlererik/the-archive.git
+git clone --branch main https://github.com/adlererik/the-archive.git
 cd the-archive
 ```
 
@@ -181,11 +181,12 @@ To upgrade, substitute the new release tag:
 
 ```bash
 git fetch origin --tags
-git checkout v1.1.0
+git checkout main
+git merge --ff-only origin/main
 ./archive install
 ```
 
-Review that release's schema instructions. This release requires **no database schema change from v1.0.0**. For systemd, use `sudo bash deploy/rebuild-archive-root.sh "$USER"`; it stops, rebuilds, and restarts with a previous-build fallback. For a foreground setup use `./archive stop`, `./archive build`, and `./archive start`.
+Review that release's schema instructions. Current main adds optional soundtrack columns to the posts table. After the private backup and dependency installation, run `pnpm exec prisma db push` before building; do not add `--accept-data-loss` or reset the database. The tagged v1.1.0 release itself had no schema change from v1.0.0. For systemd, use `sudo bash deploy/rebuild-archive-root.sh "$USER"`; it stops, rebuilds, and restarts with a previous-build fallback. For a foreground setup use `./archive stop`, `./archive build`, and `./archive start`.
 
 To migrate, install prerequisites/source on the new server, restore the private files to their matching paths, install dependencies, build, and check the gallery/login/media before changing your domain's tunnel route. A named tunnel can have multiple replicas; retiring the old server's connector is part of a planned migration. See [full backup and migration instructions](PUBLIC-SETUP.md).
 

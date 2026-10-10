@@ -60,3 +60,9 @@ The fresh production server was started on an isolated loopback port. The galler
 Release privacy checks cover tracked source, reachable Git history, commit messages, and the downloadable source archives: prohibited private-file paths, common credential formats, and known local installation credentials. Source packages are generated with `git archive`; local environments, databases, uploads, authentication files, and deployment work directories are excluded. SHA-256 checksums accompany the downloads.
 
 Physical phone/TV casting was not repeated for this documentation release. Earlier user-confirmed casting fixes remain included; see the device requirements and limitations in the feature guide.
+
+## Carousel editing, soundtracks, and themes — October 10, 2026
+
+The production build and TypeScript checks completed successfully on the workstation and in a separate Debian staging checkout. The live database was backed up during activation; optional soundtrack columns were added without a destructive reset. The prepared build was activated, the application service was active and enabled, and its existing tunnel remained active. The local server on port 3000 and the public HTTPS posts API returned the new soundtrack/edit-version metadata with the existing collection present.
+
+Browser review showed the extended editor's sequence, add/remove/move controls, soundtrack drop area, and editable timeline date. Porcelain, Midnight, and Verdant were visually reviewed; Gold was restored in the preview. No existing post was changed for the preview. The source/history privacy audit found no prohibited private-file paths or credential matches. These checks do not establish physical-TV playback of the new soundtrack composites or audible autoplay permission on every phone.
