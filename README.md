@@ -16,6 +16,14 @@ By Erik Adler:
 
 This is Erik's experience and opinion. The Archive replaces a personal photo-sharing and preservation workflow; it is not a full Instagram clone or a federated social network. There are no follower feeds, direct messages, or viewer accounts.
 
+<img width="1080" height="2404" alt="24905" src="https://github.com/user-attachments/assets/f4bfb770-9cc0-4cd7-b3e3-cafffa898c91" />
+
+<img width="1080" height="2404" alt="24908" src="https://github.com/user-attachments/assets/acf4d090-19e5-4658-bb5d-2a81b5ca2dfb" />
+
+<img width="1080" height="2404" alt="24910" src="https://github.com/user-attachments/assets/e5b9ca24-3581-4702-a6b3-62ad74fd41f3" />
+
+
+
 ## Start here
 
 **New to servers or the terminal? Follow the [beginner walkthrough](docs/BEGINNER-GUIDE.md).** It explains installation, your first login and upload, TV casting, public HTTPS, boot startup, upgrades, and backups one step at a time.
