@@ -12,7 +12,7 @@ For each substantial change, update the documentation and development notes, bui
 ./archive start
 # In another terminal, after verification:
 git status --short
-git add <source-files-and-documentation>
+git add -- README.md docs/FEATURES.md  # Substitute your reviewed source/documentation paths.
 git diff --cached --stat
 git diff --cached --name-only
 git commit -m "Describe the change"
