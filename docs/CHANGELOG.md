@@ -1,5 +1,12 @@
 # Development notes
 
+## AirPlay playback handoff correction
+
+- Erik Adler: invoke the native picker on the displayed video when possible, retain its playback position, and start unmuted playback before opening the picker.
+- Erik Adler: remove the transport’s premature pause-on-load behavior; protect the owned native player from local visibility guards and retain it through wall recycling or viewer closure.
+- Erik Adler: let the wall allocate a separate local player after handoff, restore normal local ownership on stop or unsuccessful selection, and tolerate brief wireless-state changes during a source transition.
+- Erik Adler: explain that Google Cast support does not imply an AirPlay receiver, with receiver/network troubleshooting and optional receiver-app guidance.
+
 ## One Cast button for Google Cast and AirPlay
 
 - Erik Adler: keep the existing Cast icon, styling, and placement unchanged; invoke Safari’s native `webkitShowPlaybackTargetPicker()` from the same button.

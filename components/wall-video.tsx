@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef } from "react";
 import { soundIsEnabled } from "@/lib/sound-preference";
+import { isAirPlayOwnedVideo, parkAirPlayVideo } from "@/lib/airplay-player";
 import { stopVideo } from "@/lib/video-playback";
 
 // Erik Adler: reuse the actual media element, retaining browser playback permission across wall items.
@@ -20,12 +21,14 @@ export function WallVideo({ src, poster, desktop, attach, onPlay, onAudible }: {
   useLayoutEffect(() => {
     const target = container.current;
     if (!target) return;
-    const video = player ??= document.createElement("video");
+    const video = player && !isAirPlayOwnedVideo(player) ? player : (player = document.createElement("video"));
     stopVideo(video);
     host = target;
     video.controls = !desktop;
     video.playsInline = true;
     video.setAttribute("webkit-playsinline", "true");
+    video.setAttribute("x-webkit-airplay", "allow");
+    video.disableRemotePlayback = false;
     video.loop = true;
     video.preload = "auto";
     video.muted = !soundIsEnabled();
@@ -43,7 +46,8 @@ export function WallVideo({ src, poster, desktop, attach, onPlay, onAudible }: {
       video.removeEventListener("volumechange", volumeChanged);
       if (host !== target) return;
       attach(null);
-      video.remove();
+      if (isAirPlayOwnedVideo(video)) { parkAirPlayVideo(video); if (player === video) player = null; }
+      else video.remove();
       host = null;
     };
   }, [src, poster, desktop, attach, onPlay, onAudible]);

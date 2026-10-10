@@ -5,7 +5,7 @@ import { mediaUrl } from "@/lib/archive";
 import { supportsAirPlay, useAirPlay } from "@/lib/use-airplay";
 import { castWindow, type CastContext, type RemoteController, type RemotePlayer } from "@/lib/cast-sdk";
 
-export type CastOptions = { mode?: "single" | "presentation"; photoSeconds?: number; loop?: boolean; startIndex?: number; openPicker?: boolean };
+export type CastOptions = { mode?: "single" | "presentation"; photoSeconds?: number; loop?: boolean; startIndex?: number; openPicker?: boolean; airPlayVideo?: HTMLVideoElement | null };
 type State = { transport: "google" | "airplay"; supported: boolean; ready: boolean; available: boolean; connected: boolean; busy: boolean; reason: string; error: string; device: string; mode: "single" | "presentation" | null; activeId: string; paused: boolean; ended: boolean; castItems: (items: ArchiveMedia[], options?: CastOptions) => Promise<void>; clearError: () => void; stop: () => void; togglePlayback: () => void; jump: (id: string) => void };
 const Context = createContext<State | null>(null);
 export function CastProvider({ children }: { children: React.ReactNode }) {

@@ -1,5 +1,6 @@
 "use client";
 
+import { isAirPlayOwnedVideo } from "./airplay-player";
 import { soundIsEnabled, subscribeSound } from "./sound-preference";
 
 let owner: HTMLVideoElement | null = null;
@@ -7,7 +8,7 @@ const forcedMute = new WeakMap<HTMLVideoElement, boolean>();
 const attempts = new WeakMap<HTMLVideoElement, number>();
 let interactionListeners = false;
 let resumeOwner: (() => void) | null = null;
-subscribeSound(() => { if (owner) owner.muted = Boolean(forcedMute.get(owner)) || !soundIsEnabled(); });
+subscribeSound(() => { if (owner && !isAirPlayOwnedVideo(owner)) owner.muted = Boolean(forcedMute.get(owner)) || !soundIsEnabled(); });
 
 // Erik Adler: touch-end and click are accepted audio gestures on mobile; pointer-down alone is not.
 function listenForAudioInteraction() {
@@ -31,12 +32,13 @@ export function mediaIsVisible(video: HTMLElement) {
 export function stopVideo(video: HTMLVideoElement | null) {
   if (!video) return;
   attempts.set(video, (attempts.get(video) || 0) + 1);
-  video.pause(); video.muted = true;
+  if (!isAirPlayOwnedVideo(video)) { video.pause(); video.muted = true; }
   if (owner === video) { owner = null; resumeOwner = null; }
 }
 
 // Erik Adler: pause the old owner before starting another video, including late play promises.
 export async function playVideoWithSound(video: HTMLVideoElement, allowed: () => boolean, blocked: (value: boolean) => void, failed?: (error: Error) => void, options?: { mute?: boolean }) {
+  if (isAirPlayOwnedVideo(video)) return;
   if (!allowed() || !mediaIsVisible(video)) { stopVideo(video); return; }
   if (owner && owner !== video) stopVideo(owner);
   owner = video;
@@ -58,7 +60,7 @@ export async function playVideoWithSound(video: HTMLVideoElement, allowed: () =>
     } else failed?.(error);
   } finally {
     // A newer source may already be playing on the reused wall element.
-    if (attempts.get(video) !== attempt) return;
+    if (attempts.get(video) !== attempt || isAirPlayOwnedVideo(video)) return;
     if (owner !== video || !allowed() || !mediaIsVisible(video)) { video.pause(); video.muted = true; }
   }
 }

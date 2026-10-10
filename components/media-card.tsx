@@ -113,7 +113,7 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
       <div ref={surface} {...swipe} className="media-surface relative aspect-[4/5] touch-pan-y overflow-hidden rounded-t-[1.35rem] bg-zinc-950" aria-label={carousel ? "Carousel preview. Swipe left for next; right for previous." : undefined}>
         {desktop ? <button data-media-open onClick={() => { if (!desktop) return; stopPreview(); onOpen(preview); }} className="absolute inset-0 block w-full cursor-pointer text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#d4af37]" aria-label={"Open memory from " + formatted}>{mediaPreview}</button> : <div className="absolute inset-0 block w-full">{mediaPreview}</div>}
 
-        <CastButton items={[item]} overlay />
+        <CastButton items={[item]} overlay getAirPlayVideo={() => { if (isVideo && !videoRef.current && !playbackDisabled.current) flushSync(activate); return videoRef.current; }} />
         <div className="pointer-events-none absolute left-3 right-16 top-3 flex items-start justify-between gap-2">
           <div className="pointer-events-auto absolute left-0 top-9"><FavoriteButton mediaId={item.id} compact /></div>
           {isVideo ? <span className="flex items-center gap-1.5 rounded-full border border-white/15 bg-black/65 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white backdrop-blur-md"><Play className="h-3 w-3 fill-current" /> Video</span> : <span />}
