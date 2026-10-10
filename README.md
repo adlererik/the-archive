@@ -30,22 +30,32 @@ The comparison above describes Erik's experience and priorities. This project fo
 
 The project's existing screenshots are preserved below. They illustrate the gallery; a fresh installation starts empty with your own media.
 
+<img width="1080" height="2404" alt="24921" src="https://github.com/user-attachments/assets/278955fa-8806-4115-b61d-5088bd6d9b0f" />
+Mobile device
+
+<img width="1080" height="2404" alt="24920" src="https://github.com/user-attachments/assets/1acfe1f3-81b3-4d1e-bb20-0abb9141c3dd" />
+Mobile device
+
+<img width="1080" height="2404" alt="24916" src="https://github.com/user-attachments/assets/3a69c844-be49-4f49-b3da-b58845134081" />
+Casting from mobile device.
+
 <img width="1920" height="1080" alt="Screenshot From 2026-10-10 23-37-56" src="https://github.com/user-attachments/assets/65ab78eb-f864-4f27-af84-53d5907f5e51" />
+Desktop
 
 <img width="1920" height="1080" alt="Screenshot From 2026-10-10 23-38-24" src="https://github.com/user-attachments/assets/da20533c-1464-41ea-8d95-ccb0d30cb54a" />
+Desktop
 
 <img width="1920" height="1080" alt="Screenshot From 2026-10-10 23-41-55" src="https://github.com/user-attachments/assets/30c3b3ec-c550-4022-8de9-746a31f82d39" />
+Desktop
 
 <img width="1920" height="1080" alt="Screenshot From 2026-10-10 23-39-40" src="https://github.com/user-attachments/assets/b7302eb8-c765-4d8b-9c45-2e3d9fba2bc0" />
+Desktop
 
 <img width="1920" height="1080" alt="Screenshot From 2026-10-10 23-41-02" src="https://github.com/user-attachments/assets/cb28cb67-3871-401d-8df6-577321ba964f" />
+Desktop
 
 <img width="1920" height="1080" alt="Screenshot From 2026-10-10 23-40-17" src="https://github.com/user-attachments/assets/271f2eef-5246-4e3f-b9cb-85048c2c935f" />
-
-
-
-
-
+Desktop
 
 
 ## Start here
