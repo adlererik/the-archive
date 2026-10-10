@@ -1,4 +1,17 @@
-# Development notes
+# Changelog and development notes
+
+## v1.2.0 — October 10, 2026
+
+By Erik Adler. Changes since v1.1.0:
+
+- Curate existing carousels: reorder by drag/drop or accessible buttons, append photos/videos, remove individual items, and convert single posts into carousels.
+- Insert memories at any timeline date; retain chronological sorting, stable media IDs and hearts, and detect competing edits.
+- Add post soundtracks: drag/drop upload, preview, trimming, volume, loop, replace/remove, original-video audio choice, and compatible TV media preparation.
+- Add Porcelain (light), Midnight, and Verdant themes alongside default Gold and Graphite.
+- Extend the existing Cast button to Safari's native AirPlay picker; preserve its icon, styling, position, and Chrome Google Cast behavior.
+- Improve AirPlay handoff: use the displayed playing video, preserve position, initiate playback within the tap, and protect its ownership from local visibility/recycling guards.
+- Update all-feature and beginner guides, explain the project's motivation, and publish source-only downloads with checksums.
+- **Database:** optional soundtrack fields added to Post; back up private data and apply `pnpm db:push` before rebuilding. No database reset or media re-import is required.
 
 ## AirPlay playback handoff correction
 

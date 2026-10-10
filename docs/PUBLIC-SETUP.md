@@ -57,15 +57,17 @@ On the destination machine, install prerequisites, clone the desired release tag
 
 ## Update the application
 
-Make a private backup first. Prefer a published release tag:
+Stop the application, make a private backup, and record the old Git revision first. Prefer a published release tag:
 
 ```bash
 git fetch origin --tags
-git checkout v1.1.0  # Substitute the release you intend to install.
+git checkout v1.2.0  # Substitute the release you intend to install.
 ./archive install
 # Review schema changes, then apply only if appropriate:
 pnpm db:push
 ```
+
+v1.2.0 adds optional soundtrack fields to Post. Apply the schema before building; never use `--accept-data-loss` or reset the existing database.
 
 For a foreground installation: `./archive stop`, `./archive build`, `./archive start`.
 
@@ -73,7 +75,7 @@ For systemd, run `sudo bash deploy/rebuild-archive-root.sh youruser`. This stops
 
 `./archive update` updates dependency versions and the lockfile; it is a developer operation, not the normal release-upgrade command. Public releases are source-only and contain no automatic destructive migrations.
 
-## HTTPS and Google Cast
+## HTTPS, Google Cast, and AirPlay
 
 For public hosting, install Cloudflare's official cloudflared binary for your architecture at `/usr/local/bin/cloudflared`, verifying its published release digest. Follow the [official downloads](https://developers.cloudflare.com/tunnel/downloads/) and [Cloudflare instructions](CLOUDFLARE.md). The installer also supports the specifically pinned original amd64 binary staged at `.runtime/cloudflared/cloudflared`; a different staged version requires updating its pinned digest deliberately.
 

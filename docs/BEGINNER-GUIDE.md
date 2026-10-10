@@ -1,6 +1,6 @@
 # Beginner guide: run your own Archive
 
-By Erik Adler. Current main source; latest tagged release: v1.1.0.
+By Erik Adler. Stable release: v1.2.0.
 
 This is your own Instagram-style photo/video website. Your computer or server stores the files and runs the CMS. A computer must stay powered on for other people to reach it. Start locally, add a few memories, then give it a public HTTPS address.
 
@@ -19,7 +19,7 @@ Sudo may ask for your computer/server password. Typing it shows no characters; p
 
 ```bash
 cd ~
-git clone --branch main https://github.com/adlererik/the-archive.git
+git clone --branch v1.2.0 https://github.com/adlererik/the-archive.git
 cd the-archive
 ```
 
@@ -91,7 +91,11 @@ If port 3000 is busy, stop the program already using it. The launcher will not s
 7. Write a caption and save. Open the wall to see it in chronological order.
 8. Customize the title and introductory text in Admin. Use **Info** for these guides.
 
-Administrators also get Edit controls on the wall for dates, captions, and deletion. Deleting removes the local media; make a backup first if you might need it again.
+Administrators get **Edit** on each wall post. Reorder its items by dragging or using move buttons, add more images/videos to turn a single post into a carousel, and remove individual items. Save changes when finished. **Insert here** starts a new memory near that date; you can always choose an exact date/time.
+
+In **Soundtrack**, drop or choose an audio file, preview it, set trim start/end, volume, and looping, and decide whether to mute the video's original audio. Save the post. See the [editing and soundtrack guide](CAROUSELS-SOUNDTRACKS-THEMES.md).
+
+Use **Theme** to choose Gold (the default), Graphite, light Porcelain, Midnight, or Verdant. Deleting a post or media removes its local files; make a backup first if you might need them again.
 
 ## 7. Find favorites and make a presentation
 
@@ -142,14 +146,14 @@ Cloudflare configures the route's DNS record. Keep the token private. A Quick Tu
 
 ## 10. Show media on your TV
 
-1. Use a Google Cast-compatible TV/Chromecast and supported Chrome, such as Android Chrome.
-2. Connect your phone/computer and TV to the same network.
-3. Open your gallery through its **HTTPS** address.
-4. Press the Cast overlay on the photo/video and choose your TV.
+1. Put your phone/computer and TV on the same Wi-Fi. Open the gallery's **HTTPS** address.
+2. **Android or desktop Chrome:** use a Chromecast or Google Cast-compatible TV.
+3. **iPhone, iPad, or Mac Safari:** use a TV/receiver that supports **AirPlay**, and enable AirPlay in its settings. Google Cast support alone does not mean a TV supports AirPlay.
+4. Press the **same Cast overlay** on your selected photo/video and choose the TV. Safari opens Apple's native device picker.
 5. For a slideshow, open Favorites and select **Cast presentation**.
-6. Use the TV playback controls or **Stop casting** when finished.
+6. Use playback controls or **Stop casting** when finished.
 
-The TV receives the media, not the webpage. It must be able to download that media without an admin cookie. Guest Wi-Fi isolation and unsupported browsers can prevent discovery. Chrome on iOS is not supported by Google's sender SDK. If audio needs permission locally, tap the speaker or Play once. See [casting details](FAVORITES-CASTING.md).
+The TV receives selected media, not the webpage. It must be able to download that media without an admin cookie. Guest Wi-Fi isolation can prevent discovery. Use Safari on Apple devices; Chrome on iOS is not supported by Google's sender SDK. Google Cast queues run on the receiver; keep the Safari page active for AirPlay presentation advancement. If local audio needs permission, tap Play or the speaker once. See [casting details](FAVORITES-CASTING.md).
 
 ## 11. Stop, restart, or reboot
 
@@ -177,16 +181,20 @@ The tunnel has separate controls: `sudo systemctl restart the-archive-tunnel`. `
 
 Before upgrades, stop the application and make a **private backup** of `prisma/dev.db`, `public/uploads/`, `.env`, and `.env.local`. Include all generated media in uploads. Record the current release. Store the backup outside the checkout and protect it like your passwords and photos. Then restart the service if continuing to use the site.
 
-To upgrade, substitute the new release tag:
+To upgrade to this release, **stop the site and back it up first**, then run these in its project folder:
 
 ```bash
+git rev-parse HEAD  # Write down this old revision for rollback.
 git fetch origin --tags
-git checkout main
-git merge --ff-only origin/main
+git checkout v1.2.0
 ./archive install
+export PATH="$PWD/.runtime/node/bin:$PATH"  # If you installed the private Node runtime.
+pnpm db:push
 ```
 
-Review that release's schema instructions. Current main adds optional soundtrack columns to the posts table. After the private backup and dependency installation, run `pnpm exec prisma db push` before building; do not add `--accept-data-loss` or reset the database. The tagged v1.1.0 release itself had no schema change from v1.0.0. For systemd, use `sudo bash deploy/rebuild-archive-root.sh "$USER"`; it stops, rebuilds, and restarts with a previous-build fallback. For a foreground setup use `./archive stop`, `./archive build`, and `./archive start`.
+**v1.2.0 adds optional soundtrack columns.** Review Prisma's output. Stop if it asks to reset data or remove data; never add `--accept-data-loss`. Existing posts retain their media and order. After the schema update, a foreground installation uses `./archive build` then `./archive start`. For systemd, use `sudo bash deploy/rebuild-archive-root.sh "$USER"`. That script preserves the previous build, but does not roll back the database or Git revision; keep your private backup.
+
+For future releases, substitute their tag and follow their migration notes. If installed from a ZIP rather than Git, extract the new source into a separate folder and follow the migration instructions instead of running Git commands.
 
 To migrate, install prerequisites/source on the new server, restore the private files to their matching paths, install dependencies, build, and check the gallery/login/media before changing your domain's tunnel route. A named tunnel can have multiple replicas; retiring the old server's connector is part of a planned migration. See [full backup and migration instructions](PUBLIC-SETUP.md).
 

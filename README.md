@@ -2,21 +2,29 @@
 
 ### A self-hosted Instagram replacement for your photos, videos, and memories
 
-By **Erik Adler** · Latest release **v1.1.0** · Current features on **main** · [MIT license](LICENSE)
+By **Erik Adler** · Latest release **v1.2.0** · [MIT license](LICENSE)
 
-Publish your own photo and video collection on a website you control. The Archive combines an Instagram-style chronological wall with a cinematic gallery, fast thumbnail browsing, favorites, presentations, and Google Cast. Your original media and database live on your own computer or server.
+Publish your own photo and video collection on a website you control. The Archive combines an Instagram-style chronological wall with a cinematic gallery, fast thumbnail browsing, favorites, presentations, and Google Cast / AirPlay. Your original media and database live on your own computer or server.
 
 It focuses on personal galleries and media preservation: viewers can browse memories, give hearts, save favorite photos and videos, and put them on a television. You manage uploads, captions, dates, your gallery header, and your login from the built-in CMS.
+
+## Why I developed this
+
+By Erik Adler:
+
+> I wanted a home for my memories that I could own and run myself. Instagram is a walled garden. I tried Pixelfed, but in my experience it was too limited, felt clunky, and did not work well for what I needed. I built The Archive to preserve my original photos and videos, present them beautifully, find older memories quickly, and share them on a TV without depending on a social platform.
+
+This is Erik's experience and opinion. The Archive replaces a personal photo-sharing and preservation workflow; it is not a full Instagram clone or a federated social network. There are no follower feeds, direct messages, or viewer accounts.
 
 ## Start here
 
 **New to servers or the terminal? Follow the [beginner walkthrough](docs/BEGINNER-GUIDE.md).** It explains installation, your first login and upload, TV casting, public HTTPS, boot startup, upgrades, and backups one step at a time.
 
-- [Download v1.1.0](https://github.com/adlererik/the-archive/releases/tag/v1.1.0)
+- [Download v1.2.0](https://github.com/adlererik/the-archive/releases/tag/v1.2.0)
 - [Complete feature guide](docs/FEATURES.md)
 - [Installation and deployment reference](docs/PUBLIC-SETUP.md)
 - [Favorites and casting guide](docs/FAVORITES-CASTING.md)
-- [Release notes](docs/RELEASE-v1.1.0.md)
+- [Release notes](docs/RELEASE-v1.2.0.md)
 
 ## What you can do
 
@@ -30,7 +38,7 @@ It focuses on personal galleries and media preservation: viewers can browse memo
 | Controlled sound | Sound requested by default, a small speaker toggle, and one active local video to avoid overlapping audio. |
 | Google Cast / AirPlay | One unchanged Cast overlay sends selected media through Google Cast in Chrome or native AirPlay in Safari, including directly from the wall. |
 | Personal favorites | Save individual carousel photos/videos, reorder them, and build a presentation. |
-| TV presentations | Timed photos and complete videos, optional repeat, receiver-side queues, and play/pause/stop controls. |
+| TV presentations | Timed photos and complete videos, optional repeat; Google Cast receiver queues or page-driven AirPlay presentations. |
 | Hearts | Visitors can like a whole post separately from saving individual favorites. |
 | Five gallery themes | Gold (default), Graphite, Porcelain (light), Midnight, and Verdant, with original media colors and restrained gold hairlines. |
 | Carousel curation | Reorder, add, or remove individual assets; turn single posts into carousels; insert at any timestamp. |
@@ -47,12 +55,12 @@ See [all features and their limits](docs/FEATURES.md).
 
 ## Quick installation
 
-These commands install current **main**, including carousel editing and soundtracks. The v1.1.0 release download remains the earlier stable snapshot; choose its release notes if installing that tag.
+These commands install the stable **v1.2.0** release. The beginner guide walks through installing the required tools first.
 
 Supported starting point: **Linux**, **Node.js 24+**, **pnpm 12.10.1**, **FFmpeg / FFprobe**, **Git**, and **Bash**. The beginner guide includes copy-and-paste Debian/Ubuntu prerequisite commands.
 
 ```bash
-git clone --branch main https://github.com/adlererik/the-archive.git
+git clone --branch v1.2.0 https://github.com/adlererik/the-archive.git
 cd the-archive
 ./archive setup
 ./archive start
@@ -100,6 +108,4 @@ The gallery is public wherever you publish it; Admin requires login. Keep your p
 
 Built with Next.js, TypeScript, Tailwind CSS, Framer Motion, Lucide, Prisma, and SQLite. Application source is MIT licensed. Instagram is a trademark of its owner; this project is independent and is not affiliated with Instagram or Meta.
 
-### Carousel editing, soundtracks, and five gallery palettes
-
-Curate existing posts: reorder media, add or remove photos/videos, or extend a single post into a carousel. Insert new memories at any timestamp. Add a trimmed, volume-adjustable, looping soundtrack with optional original-video audio, including compatible TV playback. Choose Gold (default), Graphite, Porcelain, Midnight, or Verdant. See the [editing and soundtrack guide](docs/CAROUSELS-SOUNDTRACKS-THEMES.md), including the database upgrade step.
+[Carousel editing, soundtracks, and themes](docs/CAROUSELS-SOUNDTRACKS-THEMES.md) includes the database upgrade step. See the [changelog](docs/CHANGELOG.md) for release history.
