@@ -55,7 +55,7 @@ export function CastProvider({ children }: { children: React.ReactNode }) {
       for (const media of items) {
         if (epoch.current !== requestId || ctx.getCurrentSession() !== session) return;
         let resource = mediaUrl(media.playbackFile || media.fileName);
-        if (media.mediaType === "IMAGE") { resource = "/api/cast/slides/" + encodeURIComponent(media.id) + "?seconds=" + seconds; const response = await fetch(resource, { method: "POST" }); if (!response.ok) throw new Error("Unable to prepare a photo for your TV. Try again."); }
+        if (media.mediaType === "IMAGE" || media.hasSoundtrack) { resource = "/api/cast/slides/" + encodeURIComponent(media.id) + "?seconds=" + seconds + "&revision=" + encodeURIComponent(media.revision || ""); const response = await fetch(resource, { method: "POST" }); if (!response.ok) throw new Error("Unable to prepare this media for your TV. Try again."); }
         const info = new sdk.media.MediaInfo(new URL(resource, mediaOrigin.origin).href, "video/mp4"); info.customData = { archiveMediaId: media.id, archiveMode: kind }; if (media.mediaType === "IMAGE") info.duration = seconds;
         const item = new sdk.media.QueueItem(info); item.autoplay = true; item.preloadTime = 2; queue.push(item);
       }

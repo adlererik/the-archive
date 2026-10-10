@@ -4,6 +4,11 @@
 
 :root {
   color-scheme: dark;
+  --studio-background: var(--studio-background);
+  --studio-panel: #121215;
+  --studio-input: rgba(0,0,0,.4);
+  --studio-ink: 255 255 255;
+  --studio-button-ink: #070709;
   --studio-accent: 212 175 55;
   --studio-soft: 244 215 126;
   --studio-counter: 241 207 118;
@@ -48,7 +53,7 @@
 
 html {
   min-height: 100%;
-  background: #070709;
+  background: var(--studio-background);
   scrollbar-gutter: stable;
 }
 
@@ -56,8 +61,8 @@ body {
   min-height: 100%;
   margin: 0;
   overflow-x: clip;
-  background: #070709;
-  color: #fff;
+  background: var(--studio-background);
+  color: rgb(var(--studio-ink));
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   text-rendering: optimizeLegibility;
 }
@@ -71,7 +76,7 @@ button { -webkit-tap-highlight-color: transparent; }
   background:
     radial-gradient(ellipse at 12% 0%, rgba(var(--studio-glow-top), .16), transparent 35rem),
     radial-gradient(ellipse at 90% 24%, rgba(var(--studio-glow-side), .14), transparent 34rem),
-    #070709;
+    var(--studio-background);
 }
 
 .archive-card::after {
@@ -103,3 +108,51 @@ input[type="range"] { accent-color: rgb(var(--studio-accent)); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+/* Erik Adler: gallery palettes share restrained gold hairlines and never recolor media. */
+:root[data-theme="midnight"] {
+  --studio-background: #080d19; --studio-panel: #111b2d; --studio-input: #0b1323;
+  --studio-accent: 158 183 220; --studio-soft: 196 212 237; --studio-counter: 206 221 244;
+  --studio-highlight: 177 199 230; --studio-play: 208 224 249; --studio-audio: 208 224 249;
+  --studio-date: 231 238 250; --studio-caption: 239 243 252;
+  --studio-fill: 161 185 220; --studio-hover: 193 211 238; --studio-save: 193 211 238;
+  --studio-glow-top: 48, 79, 132; --studio-glow-side: 37, 48, 90;
+  --studio-shadow: rgba(98,135,196,.25);
+}
+:root[data-theme="verdant"] {
+  --studio-background: #0b1411; --studio-panel: #14201a; --studio-input: #0c1711;
+  --studio-accent: 161 184 159; --studio-soft: 206 219 194; --studio-counter: 212 225 200;
+  --studio-highlight: 186 207 169; --studio-play: 209 226 192; --studio-audio: 209 226 192;
+  --studio-date: 235 239 224; --studio-caption: 242 244 233;
+  --studio-fill: 167 186 147; --studio-hover: 196 211 178; --studio-save: 196 211 178;
+  --studio-glow-top: 49, 87, 58; --studio-glow-side: 77, 89, 55;
+  --studio-shadow: rgba(122,158,111,.22);
+}
+:root[data-theme="porcelain"] {
+  color-scheme: light;
+  --studio-background: #f6f3ec; --studio-panel: #fffdf8; --studio-input: #f0ece3;
+  --studio-ink: 42 39 33; --studio-button-ink: #fffdf8;
+  --studio-accent: 119 87 40; --studio-soft: 117 86 46; --studio-counter: 247 226 181;
+  --studio-highlight: 128 94 40; --studio-play: 245 223 178; --studio-audio: 119 87 40;
+  --studio-date: 52 45 34; --studio-caption: 42 39 33;
+  --studio-fill: 114 85 46; --studio-hover: 91 66 33; --studio-save: 91 66 33;
+  --studio-glow-top: 187, 162, 111; --studio-glow-side: 174, 181, 169;
+  --studio-shadow: rgba(96,76,45,.16);
+}
+.studio-panel { background: var(--studio-panel); }
+.studio-input { background: var(--studio-input); outline: none; }
+.studio-input:focus { border-color: rgb(var(--studio-accent)); box-shadow: 0 0 0 3px rgb(var(--studio-accent) / .1); }
+.bg-studio-fill { color: var(--studio-button-ink); }
+.archive-card, .gallery-divider { border-color: rgba(212,175,55,.24); }
+.media-surface, .cinema-surface {
+  --studio-ink: 255 255 255; --studio-panel: #101014;
+  --studio-date: 249 245 233; --studio-caption: 251 249 243;
+  color: #fff; color-scheme: dark;
+}
+:root[data-theme="porcelain"] .archive-card { background: rgba(255,253,248,.85); box-shadow: 0 8px 30px -18px rgba(71,55,30,.25); }
+:root[data-theme="porcelain"] .page-glow { background: radial-gradient(ellipse at 0 0, rgba(201,178,132,.16), transparent 48rem), var(--studio-background); }
+:root[data-theme="porcelain"] .gallery-divider { border-color: rgba(158,121,55,.3); }
+:root[data-theme="porcelain"] .text-white\/35, :root[data-theme="porcelain"] .text-white\/45 { color: rgb(var(--studio-ink) / .65); }
+:root[data-theme="porcelain"] .text-white\/50, :root[data-theme="porcelain"] .text-white\/55 { color: rgb(var(--studio-ink) / .7); }
+:root[data-theme="porcelain"] .cinema-surface .bg-studio-fill { color: #fffdf8; }
+.soundtrack-control input[type="range"] { height: 16px; }

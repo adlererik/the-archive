@@ -1,5 +1,6 @@
 "use client";
 
+import { SoundtrackPlayer } from "./soundtrack-player";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Pause, Play, Volume2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -39,14 +40,15 @@ export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevio
   const [volume, setVolume] = useState(1);
   const [playbackError, setPlaybackError] = useState("");
   const videoRef = useRef<HTMLVideoElement>(null);
+  const soundtrackSurface = useRef<HTMLDivElement>(null);
   const media = post.mediaItems[mediaIndex];
   const isVideo = media?.mediaType === "VIDEO";
   const postIndex = posts.findIndex((entry) => entry.id === post.id);
   const formatted = new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(post.takenAt));
 
   const resumeVideo = useCallback((video: HTMLVideoElement) => {
-    void playVideoWithSound(video, () => !castingRef.current && videoRef.current === video, setAudioBlocked, () => setPlaybackError("Unable to start this video. Try Play, or open it in your phone’s player below."));
-  }, []);
+    void playVideoWithSound(video, () => !castingRef.current && videoRef.current === video, setAudioBlocked, () => setPlaybackError("Unable to start this video. Try Play, or open it in your phone’s player below."), { mute: Boolean(post.soundtrack?.muteVideo) });
+  }, [post.soundtrack?.muteVideo]);
   const attachVideo = useCallback((video: HTMLVideoElement | null) => {
     if (videoRef.current !== video) stopVideo(videoRef.current);
     videoRef.current = video;
@@ -123,11 +125,11 @@ export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevio
 
   return (
     <AnimatePresence>
-      <motion.div ref={modalRef} tabIndex={-1} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 overflow-y-auto bg-black/[.96] px-4 py-5 sm:px-10 sm:py-8" role="dialog" aria-modal="true" aria-label="Memory theater">
+      <motion.div ref={modalRef} tabIndex={-1} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="cinema-surface fixed inset-0 z-50 overflow-y-auto bg-black/[.96] px-4 py-5 sm:px-10 sm:py-8" role="dialog" aria-modal="true" aria-label="Memory theater">
         <button onClick={onClose} className="fixed right-5 top-5 z-[60] flex min-h-12 items-center gap-2 rounded-full border border-white/35 bg-black/80 px-5 text-sm font-bold tracking-[0.15em] text-white backdrop-blur-md hover:border-[#d4af37] sm:right-8 sm:top-8"><span>CLOSE</span><X className="h-5 w-5" /></button>
         <div className="mx-auto flex min-h-[calc(100dvh-2.5rem)] max-w-6xl flex-col justify-center py-16 sm:min-h-[calc(100dvh-4rem)]">
           <motion.div key={post.id + media.id} initial={{ opacity: 0, scale: .98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .25 }} className="relative mx-auto w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 shadow-2xl">
-            <div {...swipe} className="relative flex min-h-[45vh] touch-pan-y items-center justify-center bg-black">
+            <div ref={soundtrackSurface} {...swipe} className="relative flex min-h-[45vh] touch-pan-y items-center justify-center bg-black">
               <CastButton items={[media]} overlay />
               {isVideo ? <video key={media.id} ref={attachVideo} src={mediaUrl(media.playbackFile || media.fileName)} controls={nativeControls && !casting} poster={media.thumbnail ? mediaUrl(media.thumbnail) : undefined} preload="auto" playsInline className="max-h-[70vh] w-full object-contain" onPlay={event => { if (castingRef.current || !mediaIsVisible(event.currentTarget)) stopVideo(event.currentTarget); else setPlaying(true); }} onPause={() => setPlaying(false)} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)} onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)} onEnded={() => setPlaying(false)} onVolumeChange={event => { if (!event.currentTarget.muted) setAudioBlocked(false); }} onError={() => { setPlaying(false); setPlaybackError("Unable to load this video. Try opening it in your phone’s player below."); }} /> : <img src={mediaUrl(media.fileName)} alt="Expanded archive memory" draggable={false} className="max-h-[72vh] w-full object-contain" />}
               {post.mediaItems.length > 1 ? <>
@@ -154,7 +156,8 @@ export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevio
           </motion.div>
 
           <div className="mx-auto w-full max-w-5xl px-1 pt-8 sm:pt-10">
-            <div className="mb-5 flex flex-wrap items-center gap-3"><FavoriteButton mediaId={media.id} />{post.mediaItems.length > 1 ? <p className="text-xs text-white/50">Swipe left for the next item; right for the previous. After the final item, return to the wall.</p> : null}</div>
+            <SoundtrackPlayer track={post.soundtrack} active={!castingRef.current && (!isVideo || playing)} surface={soundtrackSurface} />
+            <div className="mb-5 mt-5 flex flex-wrap items-center gap-3"><FavoriteButton mediaId={media.id} />{post.mediaItems.length > 1 ? <p className="text-xs text-white/50">Swipe left for the next item; right for the previous. After the final item, return to the wall.</p> : null}</div>
             <p className="font-editorial text-[26px] leading-tight text-studio-date sm:text-4xl">{formatted} <span className="font-sans text-base text-studio-accent sm:text-lg">• Age {ageAt(post.takenAt)}</span></p>
             {post.caption ? <p className="mt-5 max-w-4xl whitespace-pre-wrap text-2xl leading-relaxed text-white/90">{post.caption}</p> : null}
             <div className="mt-10 flex justify-between gap-4 border-t border-white/10 pt-5">

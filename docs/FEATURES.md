@@ -76,3 +76,7 @@ Favorites belong to the current browser and hostname. They do not sync between p
 - MIT-licensed application source.
 
 You maintain the server, storage, backups, and access policy. The release is empty: it includes no personal collection, account database, visitor history, or credentials. The published gallery is public; the management interface requires authentication.
+
+## Carousel curation and soundtracks
+
+Admin editors can add/remove/reorder individual media, turn single posts into carousels, and insert memories at any date. Soundtracks support upload/drop, preview, trim, volume, loop, replace/remove, and original-video audio settings. Local playback follows visibility; compatible cast files include soundtrack audio. Gold remains the default alongside Graphite, Porcelain (light), Midnight, and Verdant. See [usage and migration instructions](CAROUSELS-SOUNDTRACKS-THEMES.md).

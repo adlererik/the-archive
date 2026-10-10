@@ -16,6 +16,14 @@ model Post {
   updatedAt  DateTime    @updatedAt
   mediaItems MediaItem[]
   likes      PostLike[]
+  soundtrackFile      String?
+  soundtrackName      String?
+  soundtrackDuration  Float   @default(0)
+  soundtrackStart     Float   @default(0)
+  soundtrackEnd       Float?
+  soundtrackVolume    Float   @default(0.65)
+  soundtrackLoop      Boolean @default(true)
+  soundtrackMuteVideo Boolean @default(true)
 
   @@index([takenAt])
 }

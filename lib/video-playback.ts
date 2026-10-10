@@ -3,17 +3,18 @@
 import { soundIsEnabled, subscribeSound } from "./sound-preference";
 
 let owner: HTMLVideoElement | null = null;
+const forcedMute = new WeakMap<HTMLVideoElement, boolean>();
 const attempts = new WeakMap<HTMLVideoElement, number>();
 let interactionListeners = false;
 let resumeOwner: (() => void) | null = null;
-subscribeSound(() => { if (owner) owner.muted = !soundIsEnabled(); });
+subscribeSound(() => { if (owner) owner.muted = Boolean(forcedMute.get(owner)) || !soundIsEnabled(); });
 
 // Erik Adler: touch-end and click are accepted audio gestures on mobile; pointer-down alone is not.
 function listenForAudioInteraction() {
   if (interactionListeners) return;
   interactionListeners = true;
   const retry = (event: Event) => {
-    if (!event.isTrusted || !soundIsEnabled() || !owner?.muted || !mediaIsVisible(owner)) return;
+    if (!event.isTrusted || !soundIsEnabled() || !owner?.muted || forcedMute.get(owner) || !mediaIsVisible(owner)) return;
     if ((event.target as Element)?.closest?.("[data-sound-toggle]")) return;
     resumeOwner?.();
   };
@@ -35,15 +36,16 @@ export function stopVideo(video: HTMLVideoElement | null) {
 }
 
 // Erik Adler: pause the old owner before starting another video, including late play promises.
-export async function playVideoWithSound(video: HTMLVideoElement, allowed: () => boolean, blocked: (value: boolean) => void, failed?: (error: Error) => void) {
+export async function playVideoWithSound(video: HTMLVideoElement, allowed: () => boolean, blocked: (value: boolean) => void, failed?: (error: Error) => void, options?: { mute?: boolean }) {
   if (!allowed() || !mediaIsVisible(video)) { stopVideo(video); return; }
   if (owner && owner !== video) stopVideo(owner);
   owner = video;
   listenForAudioInteraction();
-  resumeOwner = () => { void playVideoWithSound(video, allowed, blocked, failed); };
+  forcedMute.set(video, Boolean(options?.mute));
+  resumeOwner = () => { void playVideoWithSound(video, allowed, blocked, failed, options); };
   const attempt = (attempts.get(video) || 0) + 1; attempts.set(video, attempt);
   const current = () => owner === video && attempts.get(video) === attempt && allowed() && mediaIsVisible(video);
-  video.muted = !soundIsEnabled();
+  video.muted = Boolean(options?.mute) || !soundIsEnabled();
   try { video.volume = 1; } catch { /* Mobile browsers may use device volume only. */ }
   try {
     await video.play();

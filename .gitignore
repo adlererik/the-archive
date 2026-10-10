@@ -29,3 +29,7 @@ prisma/*.db*
 *.pfx
 *.bundle
 *.tar.gz
+*.[mM]4[aA]
+*.[aA][aA][cC]
+*.[oO][gG][gG]
+*.[fF][lL][aA][cC]

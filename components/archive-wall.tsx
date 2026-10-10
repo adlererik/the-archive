@@ -64,7 +64,7 @@ export function ArchiveWall({ header, initialPosts, initialCursor, isAdmin }: Pr
       const response = await fetch("/api/posts?cursor=" + encodeURIComponent(cursor), { cache: "no-store" });
       if (!response.ok) throw new Error("Unable to retrieve memories");
       const data = await response.json() as { posts: ArchivePost[]; nextCursor: string | null };
-      setPosts((current) => [...current, ...data.posts.filter((post) => !current.some((item) => item.id === post.id))]);
+      setPosts((current) => [...current, ...data.posts.filter((post) => !current.some((item) => item.id === post.id))].sort((a, b) => +new Date(b.takenAt) - +new Date(a.takenAt) || b.id.localeCompare(a.id)));
       setCursor(data.nextCursor);
     } catch {
       setLoadError(true);
@@ -93,7 +93,7 @@ export function ArchiveWall({ header, initialPosts, initialCursor, isAdmin }: Pr
   const selected = selectedIndex >= 0 ? posts[selectedIndex] : null;
 
   function updatePost(next: ArchivePost) {
-    setPosts((current) => current.map((post) => post.id === next.id ? next : post).sort((a, b) => +new Date(b.takenAt) - +new Date(a.takenAt)));
+    setPosts((current) => current.map((post) => post.id === next.id ? next : post).sort((a, b) => +new Date(b.takenAt) - +new Date(a.takenAt) || b.id.localeCompare(a.id)));
     setEditing(null);
   }
 
@@ -119,7 +119,7 @@ export function ArchiveWall({ header, initialPosts, initialCursor, isAdmin }: Pr
         </div>
       </header>
 
-      {posts.length ? view === "thumbnails" ? <ThumbnailWall posts={posts} loading={loading} hasMore={Boolean(cursor)} onOpen={openPost} onTimeline={toggleView} /> : <section aria-label="Memories in chronological order" className="mx-auto grid max-w-[1740px] grid-cols-1 items-start gap-5 md:grid-cols-2 xl:grid-cols-4">{posts.map((post) => <MediaCard key={post.id} post={post} isAdmin={isAdmin} theaterOpen={Boolean(selectedId)} onOpen={(mediaIndex) => openPost(post, mediaIndex)} onEdit={() => setEditing(post)} />)}</section> : <div className="mx-auto max-w-lg py-32 text-center text-white/55"><p className="font-editorial text-3xl text-white">Awaiting the first memory.</p><p className="mt-3 text-sm">Sign in to add it to the collection.</p></div>}
+      {posts.length ? view === "thumbnails" ? <ThumbnailWall posts={posts} loading={loading} hasMore={Boolean(cursor)} onOpen={openPost} onTimeline={toggleView} /> : <section aria-label="Memories in chronological order" className="mx-auto grid max-w-[1740px] grid-cols-1 items-start gap-5 md:grid-cols-2 xl:grid-cols-4">{posts.map((post) => <MediaCard key={post.id} post={post} isAdmin={isAdmin} theaterOpen={Boolean(selectedId || editing)} onOpen={(mediaIndex) => openPost(post, mediaIndex)} onEdit={() => setEditing(post)} />)}</section> : <div className="mx-auto max-w-lg py-32 text-center text-white/55"><p className="font-editorial text-3xl text-white">Awaiting the first memory.</p><p className="mt-3 text-sm">Sign in to add it to the collection.</p></div>}
       <div ref={sentinel} className="flex h-24 items-center justify-center" aria-live="polite">{loading ? <span className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-white/45"><ArrowDown className="h-4 w-4 animate-bounce" /> Retrieving the past</span> : null}</div>
       {loadError ? <p className="text-center text-sm text-white/60">The connection was interrupted. <button onClick={() => void loadMore()} className="text-studio-accent underline">Retry</button></p> : null}
       <p className="mt-6 text-center text-xs text-white/35">Visit statistics are stored locally for the archive owner. <Link href="/privacy" className="underline">Details</Link></p>

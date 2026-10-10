@@ -1,0 +1,35 @@
+"use client";
+import { Music2, Repeat2, Trash2, Upload } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { mediaUrl, type PostSoundtrack } from "@/lib/archive";
+
+export type TrackDraft = { file: File | null; removed: boolean; duration: number; start: number; end: number; volume: number; loop: boolean; muteVideo: boolean };
+export function initialTrack(track?: PostSoundtrack | null): TrackDraft { return { file: null, removed: false, duration: track?.duration || 0, start: track?.start || 0, end: track?.end || 0, volume: track?.volume ?? .65, loop: track?.loop ?? true, muteVideo: track?.muteVideo ?? true }; }
+export function appendTrack(form: FormData, track: TrackDraft) { if (track.file) form.set("soundtrack", track.file); form.set("removeSoundtrack", String(track.removed)); form.set("soundtrackSettings", JSON.stringify({ start: track.start, end: track.end || undefined, volume: track.volume, loop: track.loop, muteVideo: track.muteVideo })); }
+
+export function SoundtrackEditor({ original, value, onChange }: { original?: PostSoundtrack | null; value: TrackDraft; onChange: (next: TrackDraft) => void }) {
+  const input = useRef<HTMLInputElement>(null); const audio = useRef<HTMLAudioElement>(null);
+  const [url, setUrl] = useState(""); const [error, setError] = useState(""); const [dragging, setDragging] = useState(false);
+  const present = !value.removed && Boolean(value.file || original);
+  useEffect(() => {
+    if (!value.file) { setUrl(original ? mediaUrl(original.fileName) : ""); return; }
+    const next = URL.createObjectURL(value.file); setUrl(next); return () => URL.revokeObjectURL(next);
+  }, [value.file, original?.fileName]);
+  useEffect(() => { if (audio.current) { audio.current.volume = value.volume; if (audio.current.currentTime < value.start || audio.current.currentTime >= value.end) audio.current.currentTime = value.start; } }, [value.volume, value.start, value.end]);
+  function add(files: FileList | File[]) {
+    const file = files[0]; if (!file) return;
+    if (files.length > 1 || !/\.(mp3|m4a|aac|wav|ogg|flac)$/i.test(file.name) || file.size > 100 * 1024 * 1024) { setError("Choose one MP3, M4A, AAC, WAV, OGG, or FLAC file under 100 MB."); return; }
+    audio.current?.pause(); setError(""); onChange({ ...value, file, removed: false, start: 0, end: 0, duration: 0 });
+  }
+  return <section className="rounded-2xl border border-white/10 bg-white/[.025] p-4 sm:p-5" aria-label="Soundtrack editor">
+    <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-full bg-studio-fill/10 text-studio-accent"><Music2 className="h-5 w-5" /></span><div><h3 className="font-editorial text-2xl">Soundtrack</h3><p className="text-xs text-white/50">One audio track for the entire memory</p></div></div>{present ? <button type="button" onClick={() => { audio.current?.pause(); onChange({ ...initialTrack(), removed: true }); }} aria-label="Remove soundtrack" className="grid h-11 w-11 place-items-center rounded-full text-red-400 hover:bg-red-400/10"><Trash2 className="h-4 w-4" /></button> : null}</div>
+    <input ref={input} type="file" accept=".mp3,.m4a,.aac,.wav,.ogg,.flac,audio/*" className="hidden" onChange={event => { if (event.target.files) add(event.target.files); event.target.value = ""; }} />
+    <button type="button" onClick={() => input.current?.click()} onDragOver={event => { event.preventDefault(); event.stopPropagation(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={event => { event.preventDefault(); event.stopPropagation(); setDragging(false); add(event.dataTransfer.files); }} className={"mt-4 flex min-h-16 w-full items-center justify-center gap-2 rounded-xl border border-dashed px-3 text-sm " + (dragging ? "border-studio-accent bg-studio-fill/10" : "border-white/20 text-white/65")}><Upload className="h-4 w-4" /> {present ? "Drop a replacement or browse audio" : "Drop a soundtrack or browse audio"}</button>
+    {present ? <div className="mt-4 space-y-4"><p className="truncate text-sm text-white/80">{value.file?.name || original?.name}</p><audio key={url} ref={audio} src={url} controls preload="metadata" className="h-10 w-full" onLoadedMetadata={event => { const duration = event.currentTarget.duration; if (Number.isFinite(duration)) { if (!value.duration) onChange({ ...value, duration, end: duration }); event.currentTarget.currentTime = value.start; event.currentTarget.volume = value.volume; } }} onTimeUpdate={event => { const element = event.currentTarget; if (value.end && element.currentTime >= value.end) { if (value.loop) { element.currentTime = value.start; void element.play().catch(() => undefined); } else element.pause(); } }} onPlay={event => { if (event.currentTarget.currentTime < value.start || event.currentTarget.currentTime >= value.end) event.currentTarget.currentTime = value.start; }} onError={() => setError("Your browser cannot preview this original. The server will convert a valid audio file when saved.")} />
+      <div className="grid grid-cols-2 gap-3"><label className="text-xs text-white/60">Trim start · seconds<input type="number" min="0" max={Math.max(0, value.end - .1)} step=".1" value={Number(value.start.toFixed(2))} onChange={event => onChange({ ...value, start: Number(event.target.value) })} className="studio-input mt-2 w-full rounded-lg border border-white/15 px-3 py-2 text-white" /></label><label className="text-xs text-white/60">Trim end · seconds<input type="number" min={value.start + .1} max={value.duration || undefined} step=".1" value={Number(value.end.toFixed(2))} onChange={event => onChange({ ...value, end: Number(event.target.value) })} className="studio-input mt-2 w-full rounded-lg border border-white/15 px-3 py-2 text-white" /></label></div>
+      <label className="flex items-center gap-3 text-xs text-white/60">Volume <input aria-label="Soundtrack volume" type="range" min="0" max="1" step=".01" value={value.volume} onChange={event => onChange({ ...value, volume: Number(event.target.value) })} className="min-w-0 flex-1" /><span className="w-9 tabular-nums">{Math.round(value.volume * 100)}%</span></label>
+      <div className="flex flex-wrap gap-x-5 gap-y-3 text-xs text-white/70"><label className="flex items-center gap-2"><input type="checkbox" checked={value.loop} onChange={event => onChange({ ...value, loop: event.target.checked })} /><Repeat2 className="h-3 w-3" /> Loop trimmed audio</label><label className="flex items-center gap-2"><input type="checkbox" checked={value.muteVideo} onChange={event => onChange({ ...value, muteVideo: event.target.checked })} /> Mute original video audio</label></div><p className="text-xs leading-relaxed text-white/45">Preview with Play. The soundtrack plays while this post is viewed and stops when you leave. Use audio you have permission to share.</p>
+    </div> : null}
+    {error ? <p role="status" className="mt-3 text-xs text-red-400">{error}</p> : null}
+  </section>;
+}

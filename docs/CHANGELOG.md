@@ -1,5 +1,14 @@
 # Development notes
 
+## Carousel curation, soundtracks, and gallery palettes
+
+- Erik Adler: edit carousel sequence by drag/drop or accessible move controls; add/remove assets and extend single posts into carousels.
+- Erik Adler: soundtrack uploads with preview, trim, volume, loop, original-video audio settings, and visibility-controlled playback.
+- Erik Adler: prepare soundtrack-bearing images/videos for the standard Google Cast receiver.
+- Erik Adler: Porcelain, Midnight, and Verdant join Gold (default) and Graphite; media colors remain unchanged.
+- Erik Adler: insert a new memory near an existing timestamp; keep chronological ordering and detect competing edits.
+- Erik Adler: add optional soundtrack database columns and safe file cleanup, and document migration/usage in Admin Info.
+
 By Erik Adler.
 
 ## v1.1.0 — October 10, 2026

@@ -88,10 +88,10 @@ export function ThumbnailWall({ posts, loading, hasMore, onOpen, onTimeline }: P
   }
 
   return <div>
-    <div ref={toolbar} className="sticky top-0 z-30 mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-[#d4af37]/25 bg-[#070709]/95 py-3 backdrop-blur-xl">
+    <div ref={toolbar} className="sticky top-0 z-30 mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-[#d4af37]/25 bg-[var(--studio-background)] py-3 backdrop-blur-xl">
       <div><h2 className="text-sm font-medium text-white">Thumbnail wall</h2><p role="status" className="mt-1 text-xs text-white/55">{items.length.toLocaleString()} photos & videos{hasMore || loading ? " · Finding older memories…" : " · Newest first"}</p></div>
       <div className="flex flex-wrap items-center gap-2">
-        <label className="flex min-h-11 items-center gap-2 text-xs text-white/70">Jump to year<select value="" onChange={event => { const year = Number(event.target.value); reveal(items.findIndex(item => new Date(item.post.takenAt).getFullYear() === year)); }} className="min-h-11 rounded-full border border-white/20 bg-[#141418] px-3 text-white" aria-label="Jump to a year in the thumbnail wall"><option value="" disabled>Choose year</option>{years.map(year => <option key={year} value={year}>{year}</option>)}</select></label>
+        <label className="flex min-h-11 items-center gap-2 text-xs text-white/70">Jump to year<select value="" onChange={event => { const year = Number(event.target.value); reveal(items.findIndex(item => new Date(item.post.takenAt).getFullYear() === year)); }} className="min-h-11 rounded-full border border-white/20 studio-panel px-3 text-white" aria-label="Jump to a year in the thumbnail wall"><option value="" disabled>Choose year</option>{years.map(year => <option key={year} value={year}>{year}</option>)}</select></label>
         <button type="button" onClick={onTimeline} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 px-4 text-xs text-white/80"><Rows3 className="h-4 w-4" /> Timeline</button>
       </div>
     </div>
@@ -102,7 +102,7 @@ export function ThumbnailWall({ posts, loading, hasMore, onOpen, onTimeline }: P
           const index = windowRows.first * windowRows.columns + offset;
           const date = dateFormat.format(new Date(post.takenAt));
           const label = `${media.mediaType === "VIDEO" ? "Video" : "Photo"} from ${date}${post.mediaItems.length > 1 ? `, item ${mediaIndex + 1} of ${post.mediaItems.length}` : ""}`;
-          return <article key={media.id} className="thumbnail-tile group relative h-16 min-w-0 overflow-hidden rounded-md border border-[#d4af37]/20 bg-white/[.03] hover:border-[#d4af37]/70 focus-within:border-[#d4af37]/70">
+          return <article key={media.id} className="media-surface thumbnail-tile group relative h-16 min-w-0 overflow-hidden rounded-md border border-[#d4af37]/20 bg-white/[.03] hover:border-[#d4af37]/70 focus-within:border-[#d4af37]/70">
             <button type="button" ref={node => { if (node) buttons.current.set(media.id, node); else buttons.current.delete(media.id); }} onClick={() => onOpen(post, mediaIndex)} onKeyDown={event => navigate(event, index)} aria-label={"Open " + label.toLowerCase()} title={label + (post.caption ? "\n" + post.caption.slice(0, 160) : "")} className="block h-full w-full focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#d4af37]">
               {media.thumbnail || media.mediaType === "IMAGE" ? <img src={mediaUrl(media.thumbnail || media.fileName)} alt="" loading="lazy" decoding="async" draggable={false} width={thumbnailWidth} height={thumbnailHeight} className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center bg-zinc-900"><Play className="h-5 w-5 text-white/70" /></span>}
               {media.mediaType === "VIDEO" ? <span className="pointer-events-none absolute left-0 top-0 rounded-br bg-black/75 p-1 text-white"><Play className="h-2.5 w-2.5 fill-current" /></span> : null}

@@ -2,16 +2,16 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { themeStorageKey as storageKey, type ArchiveTheme } from "@/lib/archive-theme";
+import { archiveThemes, validTheme, themeStorageKey as storageKey, type ArchiveTheme } from "@/lib/archive-theme";
 const Context = createContext<{ theme: ArchiveTheme; setTheme: (theme: ArchiveTheme) => void } | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setCurrent] = useState<ArchiveTheme>("gold");
   useEffect(() => {
-    setCurrent(document.documentElement.dataset.theme === "graphite" ? "graphite" : "gold");
+    setCurrent(validTheme(document.documentElement.dataset.theme));
     const changed = (event: StorageEvent) => {
       if (event.key !== storageKey && event.key !== null) return;
-      const next = event.newValue === "graphite" ? "graphite" : "gold";
+      const next = validTheme(event.newValue);
       document.documentElement.dataset.theme = next;
       setCurrent(next);
     };
@@ -23,6 +23,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setCurrent(next);
     try { localStorage.setItem(storageKey, next); } catch { /* Keep the palette for this visit if storage is unavailable. */ }
   }
+  useEffect(() => {
+    const color = archiveThemes.find(option => option.id === theme)?.background || "#070709";
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", color);
+  }, [theme]);
   return <Context.Provider value={{ theme, setTheme }}>{children}</Context.Provider>;
 }
 

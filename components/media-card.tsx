@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import { SoundtrackPlayer } from "./soundtrack-player";
 import { motion } from "framer-motion";
-import { Images, Pencil, Play, Volume2, VolumeX } from "lucide-react";
+import { Images, Pencil, Play, Plus, Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ArchivePost } from "@/lib/archive";
 import { mediaUrl } from "@/lib/archive";
@@ -36,6 +38,7 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
   playbackDisabled.current = theaterOpen || (cast.connected && Boolean(cast.mode)) || cast.busy;
   const item = post.mediaItems[preview] ?? post.mediaItems[0];
   const isVideo = item?.mediaType === "VIDEO";
+  const hasSoundtrack = Boolean(post.soundtrack);
   const carousel = post.mediaItems.length > 1;
   const castingThisCard = cast.connected && cast.mode === "single" && post.mediaItems.some(media => media.id === cast.activeId);
   const formatted = new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric" }).format(new Date(post.takenAt));
@@ -45,8 +48,10 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
     stopVideo(videoRef.current);
     setAudioBlocked(false);
   }, []);
-  const { active: hovering, hover, activate } = useWallPlayback(surface, !playbackDisabled.current, isVideo, stopPreview);
+  const { active: hovering, hover, activate } = useWallPlayback(surface, !playbackDisabled.current, isVideo || hasSoundtrack, stopPreview);
   previewActive.current = hovering && !playbackDisabled.current;
+
+  useEffect(() => { setPreview(value => Math.min(value, Math.max(0, post.mediaItems.length - 1))); }, [post.mediaItems.length]);
 
   useEffect(() => {
     if (!article.current) return;
@@ -55,7 +60,7 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
     return () => observer.disconnect();
   }, []);
 
-  const playWithSound = useCallback((video: HTMLVideoElement) => playVideoWithSound(video, () => previewActive.current && !playbackDisabled.current && videoRef.current === video, setAudioBlocked), []);
+  const playWithSound = useCallback((video: HTMLVideoElement) => playVideoWithSound(video, () => previewActive.current && !playbackDisabled.current && videoRef.current === video, setAudioBlocked, undefined, { mute: Boolean(post.soundtrack?.muteVideo) }), [post.soundtrack?.muteVideo]);
   const attachVideo = useCallback((video: HTMLVideoElement | null) => {
     if (videoRef.current !== video) stopVideo(videoRef.current);
     videoRef.current = video;
@@ -105,7 +110,7 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
   return (
     <motion.article ref={article} whileHover={{ scale: 1.04, y: -4 }} transition={{ type: "spring", stiffness: 280, damping: 24 }} onPointerEnter={(event) => beginPreview(event.pointerType, event.clientX, event.clientY)} onPointerMove={(event) => beginPreview(event.pointerType, event.clientX, event.clientY)} onPointerLeave={() => hover(false)} className="archive-card group relative self-start rounded-[1.35rem] border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl hover:z-10 focus-within:z-10 hover:border-[#d4af37]/50 hover:shadow-gold">
       <div className="relative">
-      <div ref={surface} {...swipe} className="relative aspect-[4/5] touch-pan-y overflow-hidden rounded-t-[1.35rem] bg-zinc-950" aria-label={carousel ? "Carousel preview. Swipe left for next; right for previous." : undefined}>
+      <div ref={surface} {...swipe} className="media-surface relative aspect-[4/5] touch-pan-y overflow-hidden rounded-t-[1.35rem] bg-zinc-950" aria-label={carousel ? "Carousel preview. Swipe left for next; right for previous." : undefined}>
         {desktop ? <button data-media-open onClick={() => { if (!desktop) return; stopPreview(); onOpen(preview); }} className="absolute inset-0 block w-full cursor-pointer text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#d4af37]" aria-label={"Open memory from " + formatted}>{mediaPreview}</button> : <div className="absolute inset-0 block w-full">{mediaPreview}</div>}
 
         <CastButton items={[item]} overlay />
@@ -118,20 +123,21 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
         {isVideo && !theaterOpen ? <button data-sound-toggle onClick={event => { event.stopPropagation(); toggleSound(); }} aria-label={audioBlocked && soundEnabled ? "Allow sound" : soundEnabled ? "Mute sound" : "Unmute sound"} aria-pressed={soundEnabled} title={audioBlocked && soundEnabled ? "Your browser requires a tap to allow sound" : soundEnabled ? "Mute sound" : "Unmute sound"} className="absolute right-3 top-16 z-20 grid h-11 w-11 place-items-center rounded-md bg-transparent text-white/70 drop-shadow-[0_1px_3px_rgba(0,0,0,.9)] transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">{soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}{audioBlocked && soundEnabled ? <span className="absolute right-2 top-2 h-1 w-1 rounded-full bg-studio-fill" /> : null}</button> : null}
         {isAdmin ? <button onClick={onEdit} className="absolute bottom-3 right-3 z-30 flex items-center gap-1 rounded-full border border-white/15 bg-black/70 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white backdrop-blur-md hover:border-[#d4af37]/60"><Pencil className="h-3 w-3" /> Edit</button> : null}
       </div>
-      {carousel ? <div className="carousel-tray absolute inset-x-0 top-full z-20 rounded-b-2xl border border-[#d4af37]/40 bg-[#101014]/95 p-3 shadow-gold backdrop-blur-xl" aria-label="Carousel thumbnails">
+      {carousel ? <div className="carousel-tray absolute inset-x-0 top-full z-20 rounded-b-2xl border border-[#d4af37]/40 studio-panel p-3 shadow-gold backdrop-blur-xl" aria-label="Carousel thumbnails">
         <p className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-[0.12em] text-studio-counter"><span>Explore this memory</span><span>{preview + 1} / {post.mediaItems.length}</span></p>
         <div className="flex gap-2 overflow-x-auto pb-1">
-          {post.mediaItems.map((media, index) => <button key={media.id} onClick={() => choosePreview(index)} aria-label={"Preview carousel item " + (index + 1) + (media.mediaType === "VIDEO" ? ", video" : ", photo")} aria-pressed={preview === index} className={"relative h-16 w-14 shrink-0 overflow-hidden rounded-lg border-2 transition " + (preview === index ? "border-[#d4af37]" : "border-transparent hover:border-white/70")}>
+          {post.mediaItems.map((media, index) => <button key={media.id} onClick={() => choosePreview(index)} aria-label={"Preview carousel item " + (index + 1) + (media.mediaType === "VIDEO" ? ", video" : ", photo")} aria-pressed={preview === index} className={"media-surface relative h-16 w-14 shrink-0 overflow-hidden rounded-lg border-2 transition " + (preview === index ? "border-[#d4af37]" : "border-transparent hover:border-white/70")}>
             {inWindow && (media.thumbnail || media.mediaType === "IMAGE") ? <img src={mediaUrl(media.thumbnail || media.fileName)} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" /> : <span className="block h-full bg-zinc-800" />}
             <span className="absolute bottom-0 right-0 rounded-tl bg-black/80 px-1 text-[10px] text-white">{media.mediaType === "VIDEO" ? "▶ " : ""}{index + 1}</span>
           </button>)}
         </div>
       </div> : null}
       </div>
+      <SoundtrackPlayer track={post.soundtrack} active={hovering && !playbackDisabled.current} surface={surface} onActivate={() => flushSync(activate)} compact />
       <div className="min-h-[156px] px-4 py-4 sm:px-5">
         <p className="font-editorial text-[22px] leading-tight text-studio-caption">{formatted} <span className="font-sans text-sm text-white/50">• Age {ageAt(post.takenAt)}</span></p>
         {post.caption ? <p className="mt-2 line-clamp-4 text-base leading-relaxed text-white/80 sm:text-[18px]">{post.caption}</p> : <p className="mt-2 text-sm italic text-white/35">Untitled memory</p>}
-        <HeartButton postId={post.id} />
+        <div className="flex items-center justify-between gap-2"><HeartButton postId={post.id} />{isAdmin ? <Link href={"/admin?at=" + encodeURIComponent(new Date(+new Date(post.takenAt) - 1000).toISOString())} className="inline-flex min-h-11 items-center gap-1 text-[10px] text-white/50 hover:text-studio-accent"><Plus className="h-3 w-3" /> Insert here</Link> : null}</div>
       </div>
     </motion.article>
   );

@@ -95,3 +95,7 @@ Browsers can require a tap before allowing audible autoplay. The gallery request
 The gallery is public wherever you publish it; Admin requires login. Keep your private backups separate, use HTTPS for public access, and customize the included visitor privacy notice for your installation. See [security guidance](SECURITY.md), [administration](docs/ADMIN.md), and [operations](docs/OPERATIONS.md).
 
 Built with Next.js, TypeScript, Tailwind CSS, Framer Motion, Lucide, Prisma, and SQLite. Application source is MIT licensed. Instagram is a trademark of its owner; this project is independent and is not affiliated with Instagram or Meta.
+
+### Carousel editing, soundtracks, and five gallery palettes
+
+Curate existing posts: reorder media, add or remove photos/videos, or extend a single post into a carousel. Insert new memories at any timestamp. Add a trimmed, volume-adjustable, looping soundtrack with optional original-video audio, including compatible TV playback. Choose Gold (default), Graphite, Porcelain, Midnight, or Verdant. See the [editing and soundtrack guide](docs/CAROUSELS-SOUNDTRACKS-THEMES.md), including the database upgrade step.

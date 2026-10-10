@@ -5,6 +5,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        white: "rgb(var(--studio-ink) / <alpha-value>)",
         obsidian: "#070709", champagne: "#D4AF37",
         "studio-accent": "rgb(var(--studio-accent) / <alpha-value>)",
         "studio-soft": "rgb(var(--studio-soft) / <alpha-value>)",
