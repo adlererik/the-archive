@@ -1,4 +1,4 @@
-# Complete feature guide — v1.2.0
+# Complete feature guide — v1.3.0
 
 By Erik Adler. See the [beginner guide](BEGINNER-GUIDE.md) to install and the [changelog](CHANGELOG.md) for version history.
 
@@ -14,7 +14,7 @@ Erik developed it because he wanted an alternative to Instagram's walled garden.
 - **Dates and captions:** readable captions, exact dates in the viewer, and milestone age calculated from your configured birth date.
 - **All-media thumbnail wall:** switch to a dense, virtualized grid containing every photo/video, including individual carousel items. Static lazy previews avoid loading every full video.
 - **Find a year:** jump to older memories; open the exact selected item and return to the same scroll position. Timeline and thumbnail modes preserve separate browsing positions.
-- **Carousel previews:** swipe left for next and right for previous, or select a thumbnail directly. Expanded thumbnail previews reveal carousel contents. The full viewer returns to the wall after advancing past the last item; wall previews cycle within their carousel.
+- **Carousel previews:** tap the item counter or swipe left for next and right for previous, or select a thumbnail directly. Expanded thumbnail previews reveal carousel contents. The full viewer returns to the wall after advancing past the last item; wall previews cycle within their carousel.
 - **Desktop theater:** large photo/video presentation with full caption, date, age, navigation, keyboard support, and a clear Close button.
 - **Mobile viewing:** normal-wall media remains inline with native video controls; the thumbnail wall can open an exact item for inspection. Controls avoid covering the picture with giant persistent buttons.
 
@@ -74,11 +74,11 @@ The Theme button is on the wall and Favorites. Media colors are never filtered. 
 
 ## Admin and visitor information
 
-A username/password login issues a signed HTTP-only session cookie. Fresh setup creates unique credentials; change both username/password in Admin. Visitor-facing pages do not show editing tools without a valid session.
+Fresh setup explicitly selects username/password login and creates unique credentials without Cloudflare. Password login issues a signed HTTP-only session cookie; optional configured identity login is described in [Administration](ADMIN.md). Change both username/password in Admin. Visitor-facing pages do not show editing tools without a valid session.
 
-Change the gallery title, eyebrow text, and introduction in Admin. The Info panel contains the included installation, feature, editing, casting, and operation guides.
+The admin-only cogwheel at the right end of the gallery icon row opens settings: visitor history, gallery title/eyebrow/introduction, login settings, and Info & documentation. The square-plus opens the separate **A new chapter** media uploader. The Info panel contains the included installation, feature, editing, casting, and operation guides.
 
-Statistics include visits, collection counts/hearts, approximate city/country, device, OS, and browser. Private/local IP addresses are hidden. Location is an IP-derived estimate, not GPS, and can be wrong or missing. A clear-all action resets visitor records; retention pruning and a visitor privacy page are included. Customize the notice for your deployment. Administrative statistics are not shipped with source releases.
+Statistics include visits, collection counts/hearts, IP addresses, approximate city/country with flags, device, OS icons, and browser. IPs are visible only to the administrator. Local addresses and recognized administrator browsers/IPs are excluded, including matching historical rows. Sign in on a new browser/address to identify it as yours. Location is IP-derived, not GPS, and can be wrong or missing. History remains until manually deleted, with individual/all-record deletion and paged access to older records. The visitor privacy page describes this behavior. Administrative statistics are not shipped with source releases.
 
 ## Import and preservation
 
@@ -93,3 +93,11 @@ Supported beginner path: Debian/Ubuntu Linux, Node.js 24+, pinned pnpm, FFmpeg/F
 Start/stop/restart/status commands, Debian boot services, Cloudflare Quick/named tunnels, public HTTPS, private backups, server migration, and release upgrades are documented. The rebuild helper preserves the previous build, not a database/source rollback. v1.2.0 requires applying the optional soundtrack schema fields before building an older installation.
 
 Source ZIP/tarball releases include checksums, schema, lockfile, and guides. They exclude credentials, personal media, populated databases, visitor data, private settings, backups, runtime binaries, and compiled output. The source is MIT licensed; owners maintain their own hosting and storage.
+
+## Direct media and presentation links
+
+See [Sharing](SHARING.md) for a walkthrough and [Visitor statistics](VISITOR-STATS.md) for outside-only history and deletion.
+
+The paper-plane **Send to** control shares a single carousel asset, or a favorites presentation in the selected order. Choose Copy link, Email, Message, or the native sharing sheet where supported. Compact `/s/<token>` links are saved on the server, work without a viewer account, and include thumbnail preview metadata for messaging apps that support previews. Existing links keep their original selection/order when local favorites change; deleting source media makes it unavailable in those links.
+
+Shared presentations advance automatically through photos and videos and repeat by default. Photo duration and Repeat use the choices made when creating the link. Shared links request sound on by default. If a browser blocks audible autoplay, playback falls back to muted with a Tap for sound control; strict settings may also require Play. Shared videos have native controls for scrubbing, play/pause, volume, and fullscreen where supported, plus playback speed choices. Presentations also have a position bar for moving between memories. Gallery media controls form a discreet top-right column: Cast where supported, Send to, Favorite, then Volume where audio is present. Icons are 16px with matching small backgrounds at 37.5% opacity (25% less opaque than before). The carousel counter uses the same style and advances to the next item when tapped. Overlays fade after three seconds of inactivity; moving the pointer, tapping, or focusing a control reveals them. Keyboard-focused controls and open sharing/casting menus remain visible. Shared URLs use no paid service or external shortener. Back up `.runtime/shared-links/` to preserve them during migration.

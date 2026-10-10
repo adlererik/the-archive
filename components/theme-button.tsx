@@ -5,7 +5,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { archiveThemes } from "@/lib/archive-theme";
 import { useTheme } from "./theme-provider";
 
-export function ThemeButton() {
+export function ThemeButton({ iconOnly = false }: { iconOnly?: boolean }) {
   const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState({ left: 16, top: 16 });
@@ -29,7 +29,7 @@ export function ThemeButton() {
     setOpen(value => !value);
   }
   return <div ref={root} className="relative z-30">
-    <button ref={trigger} type="button" onClick={toggle} aria-expanded={open} aria-controls={id} aria-label={"Theme: " + archiveThemes.find(option => option.id === theme)?.name} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#d4af37]/30 bg-white/[.025] px-4 text-xs text-white/80 transition hover:bg-white/[.06] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#d4af37]"><Palette className="h-4 w-4" /><span>Theme</span><span className="text-white/45">{archiveThemes.find(option => option.id === theme)?.name}</span></button>
+    <button ref={trigger} type="button" onClick={toggle} aria-expanded={open} aria-controls={id} aria-label={"Theme: " + archiveThemes.find(option => option.id === theme)?.name} title="Choose gallery theme" className={iconOnly ? "gallery-icon-button" : "inline-flex min-h-11 items-center gap-2 rounded-full border border-[#d4af37]/30 bg-white/[.025] px-4 text-xs text-white/80 transition hover:bg-white/[.06] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#d4af37]"}><Palette aria-hidden="true" className={iconOnly ? "h-5 w-5" : "h-4 w-4"} strokeWidth={iconOnly ? 1.6 : 2} />{!iconOnly ? <><span>Theme</span><span className="text-white/45">{archiveThemes.find(option => option.id === theme)?.name}</span></> : null}</button>
     {open ? <div id={id} role="group" aria-label="Gallery theme" style={position} className="fixed w-64 rounded-2xl border border-[#d4af37]/30 studio-panel max-h-[calc(100dvh-2rem)] overflow-y-auto p-2 shadow-2xl backdrop-blur-xl">
       {archiveThemes.map(option => <button key={option.id} type="button" aria-pressed={theme === option.id} onClick={() => { setTheme(option.id); setOpen(false); trigger.current?.focus(); }} className="flex min-h-16 w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-white transition hover:bg-white/[.06] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#d4af37]"><span style={{ backgroundColor: option.swatch }} className="h-8 w-8 shrink-0 rounded-full border border-[#d4af37]/40" /><span className="flex-1"><span className="block text-sm">{option.name}</span><span className="mt-1 block text-[11px] text-white/45">{option.description}</span></span>{theme === option.id ? <Check className="h-4 w-4 text-white/70" /> : null}</button>)}
     </div> : null}

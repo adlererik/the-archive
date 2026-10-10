@@ -1,5 +1,16 @@
 # Changelog and development notes
 
+## v1.3.0 — October 10, 2026
+
+- Add compact public links for individual media and ordered photo/video Favorites presentations, with repeating playback and thumbnail preview metadata.
+- Offer Copy link, Email, Message, and supported native sharing; provide video scrubbing, presentation seeking, playback speed, fullscreen, and browser-aware sound enablement.
+- Organize gallery icons below the header divider; separate lock/logout, square-plus uploads, and far-right settings cogwheel.
+- Match media overlay/counter styling, reduce background opacity to 37.5%, and fade after three seconds of inactivity while preserving keyboard/menu access.
+- Keep visitor history until manual deletion; show public IP, country flag, approximate city, OS/device/browser, and pagination. Exclude local and recognized owner identities/IPs.
+- Explicitly default fresh setup to CMS username/password with unique generated credentials. Add optional configured owner-only Cloudflare sign-in with signed JWT verification, secure logout, and recovery guidance.
+- Refresh all current guides, preserve existing README screenshots, add sharing/visitor walkthroughs, and publish audited source-only assets with checksums.
+- No schema change from v1.2.0; preserve existing installation credentials, runtime settings, shared links, database, and uploads.
+
 ## v1.2.0 — October 10, 2026
 
 By Erik Adler. Changes since v1.1.0:

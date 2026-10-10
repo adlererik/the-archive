@@ -94,3 +94,15 @@ Before browsing, the new database had zero posts, media items, and visits, and u
 All local documentation links resolve. Git history, the index, and the source-only ZIP/tarball are checked for excluded private paths, common credential formats, and known private installation credential matches. Release archives are generated from Git source, not the working directory, and include SHA-256 checksums. Erik Adler's requested attribution and public repository address are intentional; installation identities, private credentials, original media, databases, visitor records, and runtime artifacts are excluded.
 
 These checks establish clean installation and source-package health. They do not add a new physical-phone/TV test; the earlier receiver confirmations and latest AirPlay handoff limitations above still apply.
+
+## Public v1.3.0 source release — October 10, 2026
+
+A separate clean directory was extracted from the audited Git source candidate and ran `./archive setup` with Node.js 24 and the locked dependencies. Production compilation, TypeScript validation, static generation, and build tracing completed successfully. The production server then ran on an isolated verification port; the existing gallery was left running.
+
+The clean setup explicitly generated `ADMIN_AUTH_MODE="password"`, a unique password/session secret distinct from the private installation, and environment files with permissions 0600. No Cloudflare configuration or saved identity mode was present. SQLite contained zero posts, media items, and visits; uploads contained only `.gitkeep`. The same counts remained after the local checks.
+
+Gallery, Favorites, privacy, password login, posts, and Cast configuration endpoints responded successfully. Anonymous media/settings administration redirected to password login. Login using the generated credentials succeeded with a signed HTTP-only SameSite cookie. Authenticated settings included the new sharing and visitor guides. Logout returned to the relative gallery root, cleared the cookie, and protected settings required login again. No credential value is recorded here.
+
+All three pre-existing README image embeds were preserved exactly. Local documentation links were checked. Reachable Git history, staged source, and the final source archives were audited for private paths, common credential patterns, and known private installation secret matches. Source archives are produced using `git archive`, with SHA-256 checksums; no workspace data, populated database, uploads, private runtime settings, credential files, or compiled output belongs in them.
+
+These checks establish clean installation, default password authentication, handbook delivery, and source packaging. They do not claim a new physical phone/TV test or audible autoplay on every device. Earlier casting confirmations remain historical evidence; receiver/browser requirements and AirPlay sender-lifecycle limits still apply. Earlier sections describe the interface of the release tested there; [Features](FEATURES.md) documents the current release.

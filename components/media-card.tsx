@@ -10,9 +10,11 @@ import { mediaUrl } from "@/lib/archive";
 import { ageAt } from "@/lib/dates";
 import { HeartButton } from "./heart-button";
 import { FavoriteButton } from "./favorite-button";
+import { ShareButton } from "./share-button";
 import { CastButton } from "./cast-button";
 import { useCast } from "./cast-provider";
 import { useMediaSwipe } from "@/lib/use-media-swipe";
+import { useMediaControls } from "@/lib/use-media-controls";
 import { useWallPlayback } from "@/lib/use-wall-playback";
 import { playVideoWithSound, stopVideo } from "@/lib/video-playback";
 import { flushSync } from "react-dom";
@@ -32,6 +34,9 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
   const article = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const surface = useRef<HTMLDivElement>(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [castMenuOpen, setCastMenuOpen] = useState(false);
+  const controls = useMediaControls(surface, shareOpen || castMenuOpen);
   const manualPreview = useRef(false);
   const previewActive = useRef(false);
   const playbackDisabled = useRef(false);
@@ -73,6 +78,7 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
   useEffect(() => { if (!theaterOpen && castingThisCard && item && cast.activeId !== item.id && !cast.busy) void cast.castItems([item]); }, [theaterOpen, castingThisCard, item, cast.activeId, cast.busy, cast.castItems]);
 
   function choosePreview(index: number) {
+    controls.reveal();
     manualPreview.current = true;
     if (index === preview) { flushSync(activate); if (videoRef.current) void playWithSound(videoRef.current); return; }
     stopVideo(videoRef.current);
@@ -84,6 +90,7 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
   function toggleSound() {
     const enabled = !(soundEnabled && !audioBlocked);
     setSoundEnabled(enabled);
+    if (enabled && !playbackDisabled.current) flushSync(activate);
     if (enabled && videoRef.current) void playWithSound(videoRef.current);
   }
   function beginPreview(pointerType: string, x: number, y: number) {
@@ -110,18 +117,19 @@ export function MediaCard({ post, isAdmin, theaterOpen, onOpen, onEdit }: Props)
   return (
     <motion.article ref={article} whileHover={{ scale: 1.04, y: -4 }} transition={{ type: "spring", stiffness: 280, damping: 24 }} onPointerEnter={(event) => beginPreview(event.pointerType, event.clientX, event.clientY)} onPointerMove={(event) => beginPreview(event.pointerType, event.clientX, event.clientY)} onPointerLeave={() => hover(false)} className="archive-card group relative self-start rounded-[1.35rem] border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl hover:z-10 focus-within:z-10 hover:border-[#d4af37]/50 hover:shadow-gold">
       <div className="relative">
-      <div ref={surface} {...swipe} className="media-surface relative aspect-[4/5] touch-pan-y overflow-hidden rounded-t-[1.35rem] bg-zinc-950" aria-label={carousel ? "Carousel preview. Swipe left for next; right for previous." : undefined}>
+      <div ref={surface} {...swipe} {...controls.activity} data-controls-visible={controls.visible} className="media-surface relative aspect-[4/5] touch-pan-y overflow-hidden rounded-t-[1.35rem] bg-zinc-950" aria-label={carousel ? "Carousel preview. Tap the counter or swipe left for next; swipe right for previous." : undefined}>
         {desktop ? <button data-media-open onClick={() => { if (!desktop) return; stopPreview(); onOpen(preview); }} className="absolute inset-0 block w-full cursor-pointer text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#d4af37]" aria-label={"Open memory from " + formatted}>{mediaPreview}</button> : <div className="absolute inset-0 block w-full">{mediaPreview}</div>}
 
-        <CastButton items={[item]} overlay getAirPlayVideo={() => { if (isVideo && !videoRef.current && !playbackDisabled.current) flushSync(activate); return videoRef.current; }} />
-        <div className="pointer-events-none absolute left-3 right-16 top-3 flex items-start justify-between gap-2">
-          <div className="pointer-events-auto absolute left-0 top-9"><FavoriteButton mediaId={item.id} compact /></div>
-          {isVideo ? <span className="flex items-center gap-1.5 rounded-full border border-white/15 bg-black/65 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white backdrop-blur-md"><Play className="h-3 w-3 fill-current" /> Video</span> : <span />}
-          {carousel ? <span className="flex items-center gap-1.5 rounded-full border border-[#d4af37]/35 bg-black/65 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-studio-counter backdrop-blur-md transition-transform group-hover:scale-110"><Images className="h-3 w-3" /> {preview + 1} / {post.mediaItems.length}</span> : null}
+        <div className="media-controls-fade absolute right-2 top-2 z-30 flex flex-col gap-1" role="group" aria-label="Media controls">
+          <CastButton items={[item]} overlay inColumn onMenuOpenChange={setCastMenuOpen} getAirPlayVideo={() => { if (isVideo && !videoRef.current && !playbackDisabled.current) flushSync(activate); return videoRef.current; }} />
+          <ShareButton ids={[item.id]} overlay onMenuOpenChange={setShareOpen} title={post.caption.slice(0, 100) || "A memory for you"} />
+          <FavoriteButton mediaId={item.id} overlay />
+          {(isVideo || hasSoundtrack) && !theaterOpen ? <button data-sound-toggle onClick={event => { event.stopPropagation(); toggleSound(); }} aria-label={audioBlocked && soundEnabled ? "Allow sound" : soundEnabled ? "Mute sound" : "Unmute sound"} aria-pressed={soundEnabled} title={audioBlocked && soundEnabled ? "Your browser requires a tap to allow sound" : soundEnabled ? "Mute sound" : "Unmute sound"} className="media-overlay-button">{soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}{audioBlocked && soundEnabled ? <span className="absolute right-2 top-2 h-1 w-1 rounded-full bg-studio-fill" /> : null}</button> : null}
         </div>
+        {isVideo ? <div className="media-controls-fade pointer-events-none absolute left-2 top-2"><span className="media-overlay-button media-overlay-counter"><Play aria-hidden="true" className="fill-current" /> Video</span></div> : null}
+        {carousel ? <div className="media-controls-fade absolute right-14 top-2 z-30"><button type="button" onClick={event => { event.stopPropagation(); movePreview(1); }} aria-label={`Next carousel item. Showing ${preview + 1} of ${post.mediaItems.length}`} title="Next carousel item" className="media-overlay-button media-overlay-counter"><Images aria-hidden="true" /> {preview + 1} / {post.mediaItems.length}</button></div> : null}
 
-        {isVideo && !theaterOpen ? <button data-sound-toggle onClick={event => { event.stopPropagation(); toggleSound(); }} aria-label={audioBlocked && soundEnabled ? "Allow sound" : soundEnabled ? "Mute sound" : "Unmute sound"} aria-pressed={soundEnabled} title={audioBlocked && soundEnabled ? "Your browser requires a tap to allow sound" : soundEnabled ? "Mute sound" : "Unmute sound"} className="absolute right-3 top-16 z-20 grid h-11 w-11 place-items-center rounded-md bg-transparent text-white/70 drop-shadow-[0_1px_3px_rgba(0,0,0,.9)] transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">{soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}{audioBlocked && soundEnabled ? <span className="absolute right-2 top-2 h-1 w-1 rounded-full bg-studio-fill" /> : null}</button> : null}
-        {isAdmin ? <button onClick={onEdit} className="absolute bottom-3 right-3 z-30 flex items-center gap-1 rounded-full border border-white/15 bg-black/70 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white backdrop-blur-md hover:border-[#d4af37]/60"><Pencil className="h-3 w-3" /> Edit</button> : null}
+        {isAdmin ? <div className="media-controls-fade absolute bottom-2 right-2 z-30"><button type="button" onClick={onEdit} className="media-overlay-button media-overlay-counter"><Pencil aria-hidden="true" /> Edit</button></div> : null}
       </div>
       {carousel ? <div className="carousel-tray absolute inset-x-0 top-full z-20 rounded-b-2xl border border-[#d4af37]/40 studio-panel p-3 shadow-gold backdrop-blur-xl" aria-label="Carousel thumbnails">
         <p className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-[0.12em] text-studio-counter"><span>Explore this memory</span><span>{preview + 1} / {post.mediaItems.length}</span></p>

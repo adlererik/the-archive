@@ -10,6 +10,7 @@ import { mediaUrl } from "@/lib/archive";
 import { ageAt } from "@/lib/dates";
 import { useModal } from "@/lib/use-modal";
 import { FavoriteButton } from "./favorite-button";
+import { ShareButton } from "./share-button";
 import { CastButton } from "./cast-button";
 import { useCast } from "./cast-provider";
 import { useMediaSwipe } from "@/lib/use-media-swipe";
@@ -157,7 +158,7 @@ export function TheaterModal({ post, initialMediaIndex, posts, onClose, onPrevio
 
           <div className="mx-auto w-full max-w-5xl px-1 pt-8 sm:pt-10">
             <SoundtrackPlayer track={post.soundtrack} active={!castingRef.current && (!isVideo || playing)} surface={soundtrackSurface} />
-            <div className="mb-5 mt-5 flex flex-wrap items-center gap-3"><FavoriteButton mediaId={media.id} />{post.mediaItems.length > 1 ? <p className="text-xs text-white/50">Swipe left for the next item; right for the previous. After the final item, return to the wall.</p> : null}</div>
+            <div className="mb-5 mt-5 flex flex-wrap items-center gap-3"><FavoriteButton mediaId={media.id} /><ShareButton ids={[media.id]} title={post.caption.slice(0, 100) || "A memory for you"} />{post.mediaItems.length > 1 ? <p className="text-xs text-white/50">Swipe left for the next item; right for the previous. After the final item, return to the wall.</p> : null}</div>
             <p className="font-editorial text-[26px] leading-tight text-studio-date sm:text-4xl">{formatted} <span className="font-sans text-base text-studio-accent sm:text-lg">• Age {ageAt(post.takenAt)}</span></p>
             {post.caption ? <p className="mt-5 max-w-4xl whitespace-pre-wrap text-2xl leading-relaxed text-white/90">{post.caption}</p> : null}
             <div className="mt-10 flex justify-between gap-4 border-t border-white/10 pt-5">

@@ -1,6 +1,6 @@
 # Cloudflare HTTPS, domains, and server operations
 
-By Erik Adler. Updated for v1.1.0.
+By Erik Adler. Updated for v1.3.0. Cloudflare is optional; local installation and password login work without it.
 
 ## Server layout
 
@@ -86,3 +86,11 @@ sudo journalctl -u the-archive-tunnel -n 100 --no-pager
 Stopping the tunnel removes public access while the LAN site can stay running. Stopping the application uses `sudo systemctl stop the-archive@youruser`. Both enabled services start at boot. To disable tunnel boot startup, use `sudo systemctl disable --now the-archive-tunnel`. Re-enable it with `sudo systemctl enable --now the-archive-tunnel`.
 
 Automatic binary updates are disabled because systemd supervises the process. To update, obtain a new official [cloudflared release](https://github.com/cloudflare/cloudflared/releases), verify its release digest, stop the tunnel, install the verified binary at `/usr/local/bin/cloudflared`, and restart it. Preserve `/etc/the-archive-tunnel/` and the systemd unit. Application updates follow [Operations](OPERATIONS.md) and do not require recreating the tunnel. A Quick Tunnel restart changes its URL; a named tunnel's configured custom hostname stays stable.
+
+## Optional identity login, public links, and costs
+
+Cloudflare Tunnel supplies HTTPS hosting; Cloudflare Access is a separate optional admin identity gateway. Keep standard CMS password login unless you deliberately configure and choose the integration in [Administration](ADMIN.md#optional-cloudflare-sign-in). Protect admin paths, not the whole gallery, public media, casting endpoints, or `/s/*` links; recipients and TVs need access without an admin session.
+
+Cloudflare currently lists Zero Trust Free at $0 for teams up to 50 users; this project's optional owner-only Access setup fits that limit. Domain registration/renewal, your server/storage/Internet, optional paid Cloudflare products, and receiver hardware remain separate costs. Review the current [plan page](https://www.cloudflare.com/plans/zero-trust-services/) and your dashboard before enabling extras. The CMS does not create paid subscriptions.
+
+Use a named tunnel and stable hostname for enduring shared URLs. A Quick Tunnel URL changes after restart, so old links sent to friends can stop working. Back up the private shared-link directory and source media. See [Sharing](SHARING.md).

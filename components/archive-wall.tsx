@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, Grid3X3, Plus, Rows3, Sparkles, Star } from "lucide-react";
+import { ArrowDown, Grid3X3, LockKeyhole, Rows3, Settings, Sparkles, SquarePlus, UnlockKeyhole } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
@@ -14,6 +14,21 @@ import { ThemeButton } from "./theme-button";
 import { ThumbnailWall } from "./thumbnail-wall";
 
 type Props = { header: HeaderSettings; initialPosts: ArchivePost[]; initialCursor: string | null; isAdmin: boolean };
+
+function FilmReelIcon() {
+  return <svg aria-hidden="true" data-icon="film-reel" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="10.5" cy="10.5" r="8.5" />
+    <circle cx="10.5" cy="10.5" r="1" />
+    <g fill="currentColor" stroke="none">
+      <circle cx="10.5" cy="5.2" r="1.7" />
+      <circle cx="15.5" cy="8.9" r="1.7" />
+      <circle cx="13.6" cy="14.8" r="1.7" />
+      <circle cx="7.4" cy="14.8" r="1.7" />
+      <circle cx="5.5" cy="8.9" r="1.7" />
+    </g>
+    <path d="M10.5 19H19a3 3 0 0 0 3-3" />
+  </svg>;
+}
 
 export function ArchiveWall({ header, initialPosts, initialCursor, isAdmin }: Props) {
   const favorites = useFavorites();
@@ -104,18 +119,22 @@ export function ArchiveWall({ header, initialPosts, initialCursor, isAdmin }: Pr
   }
 
   return (
-    <main className="page-glow min-h-screen overflow-x-clip px-4 pb-16 pt-6 sm:px-8 sm:pt-10 lg:px-12">
-      <header className="gallery-divider mx-auto mb-12 flex max-w-[1740px] flex-col items-start justify-between gap-6 border-b border-white/[0.08] pb-7 sm:flex-row sm:items-end">
-        <div>
+    <main className="page-glow relative min-h-screen overflow-x-clip px-4 pb-16 pt-6 sm:px-8 sm:pt-10 lg:px-12">
+      <div className="header-admin-control">
+        {isAdmin ? <form action="/api/admin/logout" method="post"><button type="submit" className="gallery-icon-button" aria-label="Log out of admin" title="Log out of admin"><UnlockKeyhole aria-hidden="true" className="h-5 w-5" strokeWidth={1.6} /></button></form> : <Link href="/admin" className="gallery-icon-button" aria-label="Log in to admin" title="Admin login"><LockKeyhole aria-hidden="true" className="h-5 w-5" strokeWidth={1.6} /></Link>}
+      </div>
+      <header className="mx-auto mb-8 max-w-[1740px]">
+        <div className="gallery-divider min-w-0 border-b border-white/[0.08] pb-6 pr-14">
           <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-studio-accent"><Sparkles className="h-3.5 w-3.5" /> {header.eyebrow}</div>
           <h1 className="font-editorial break-words text-5xl tracking-[-.045em] text-white sm:text-7xl">{header.title}</h1>
           <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/55 sm:text-base">{header.description}</p>
         </div>
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
-          <ThemeButton />
-          <button type="button" onClick={toggleView} aria-pressed={view === "thumbnails"} title={view === "thumbnails" ? "Return to the timeline" : "Browse every image and video"} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#d4af37]/35 px-4 text-xs text-white/80">{view === "thumbnails" ? <Rows3 className="h-4 w-4 text-studio-accent" /> : <Grid3X3 className="h-4 w-4 text-studio-accent" />}{view === "thumbnails" ? "Timeline" : "Thumbnail wall"}</button>
-          <Link href="/favorites" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 px-4 text-xs text-white/80"><Star className="h-4 w-4 text-studio-accent" /> Favorites{favorites.ready && favorites.ids.length ? " · " + favorites.ids.length : ""}</Link>
-          {isAdmin ? <Link href="/admin" className="flex items-center gap-2 rounded-full border border-[#d4af37]/50 bg-studio-fill/10 px-4 py-2 text-xs font-semibold text-studio-soft hover:bg-studio-fill/20"><Plus className="h-4 w-4" /> Add memory</Link> : null}
+        <div className="gallery-toolbar -ml-2.5 mt-2" role="group" aria-label="Gallery controls">
+          <ThemeButton iconOnly />
+          <button type="button" onClick={toggleView} aria-label={view === "thumbnails" ? "Return to the timeline" : "Browse every image and video"} aria-pressed={view === "thumbnails"} title={view === "thumbnails" ? "Return to the timeline" : "Browse every image and video"} className="gallery-icon-button">{view === "thumbnails" ? <Rows3 aria-hidden="true" className="h-5 w-5" strokeWidth={1.6} /> : <Grid3X3 aria-hidden="true" className="h-5 w-5" strokeWidth={1.6} />}</button>
+          <Link href="/favorites" className="gallery-icon-button gallery-presentation-link" aria-label={"Presentation selection" + (favorites.ready ? ": " + favorites.ids.length + " selected" : "")} title="Presentation selection"><FilmReelIcon />{favorites.ready ? <span className="gallery-selection-count" aria-hidden="true">{favorites.ids.length}</span> : null}</Link>
+          {isAdmin ? <Link href="/admin" className="gallery-icon-button" aria-label="Add memory" title="Add memory"><SquarePlus aria-hidden="true" className="h-5 w-5" strokeWidth={1.6} /></Link> : null}
+          {isAdmin ? <Link href="/admin/settings" className="gallery-icon-button gallery-settings-link" aria-label="Archive settings" title="Archive settings"><Settings aria-hidden="true" className="h-5 w-5" strokeWidth={1.6} /></Link> : null}
         </div>
       </header>
 

@@ -16,6 +16,7 @@ const settings = [
   'NEXT_PUBLIC_BIRTH_DATE="' + birth.toISOString().slice(0, 10) + '"',
   'SESSION_COOKIE_SECURE="false"',
   'TRUST_PROXY="false"',
+  'ADMIN_AUTH_MODE="password"',
 ];
 try {
   await writeFile(path.join(root, ".env.local"), settings.join("\n") + "\n", { flag: "wx", mode: 0o600 });

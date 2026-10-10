@@ -13,3 +13,7 @@ python3 scripts/check-domains.py yourchosenname.com yourchosenname.page
 ```
 
 The script uses IANA-discovered RDAP endpoints and the .me registry's WHOIS service when needed. A missing registration record does not establish that a name is registrable or has standard pricing. Reserved/premium names and taxes can differ. Status results are written under ignored `work/cloudflare/`; registrant contact details are not saved.
+
+## Keep shared links usable
+
+A direct media or presentation URL includes your hostname. Use a stable domain before sending lasting links; a Quick Tunnel hostname can change when restarted. Changing your domain does not rewrite links already sent in messages. Preserve the old hostname with a route/redirect if you need existing links to remain usable, and back up `.runtime/shared-links/` along with your database and uploads. [Sharing guide](SHARING.md).

@@ -16,7 +16,7 @@ Existing assets keep their media IDs when reordered. Favorites remain attached t
 
 ## Insert anywhere in the timeline
 
-Press **Insert here** beneath an existing memory to open a new upload with a suggested timestamp just before that memory. Adjust the date/time to the exact instant you want. Admin's regular **Upload** form also accepts any year or date, for a single post or a carousel. New posts and edited dates are sorted newest first automatically; reload the wall after an upload.
+Press **Insert here** beneath an existing memory to open a new upload with a suggested timestamp just before that memory. Adjust the date/time to the exact instant you want. The square-plus → **A new chapter** uploader also accepts any year or date, for a single post or a carousel. New posts and edited dates are sorted newest first automatically; reload the wall after an upload.
 
 ## Give a post a soundtrack
 
@@ -51,4 +51,4 @@ Preferences are saved per browser and hostname. New visitors start in Gold. Medi
 
 ## Upgrade notes
 
-This feature update adds optional soundtrack fields to `Post`. Back up SQLite, uploads, and private environment files before deployment. Run `pnpm exec prisma db push` with the new schema; do not use `--accept-data-loss` or reset the database. Existing posts get empty soundtrack defaults and keep their media/order. Generate the client, build, and restart your application. Preserve the former build and a private database backup for rollback.
+Soundtrack fields were added to `Post` in v1.2.0. v1.3.0 adds no further schema changes. Back up SQLite, uploads, and private environment files before deployment. Run `pnpm exec prisma db push` with the new schema; do not use `--accept-data-loss` or reset the database. Existing posts get empty soundtrack defaults and keep their media/order. Generate the client, build, and restart your application. Preserve the former build and a private database backup for rollback.

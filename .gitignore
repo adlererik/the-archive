@@ -33,3 +33,21 @@ prisma/*.db*
 *.[aA][aA][cC]
 *.[oO][gG][gG]
 *.[fF][lL][aA][cC]
+
+# Private installation artifacts and additional media formats
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.sqlite3-*
+*.bak
+*.backup
+*.kdbx
+*.credentials
+id_rsa
+id_ed25519
+*.[gG][iI][fF]
+*.[aA][vV][iI]
+*.[mM][kK][vV]
+*.[wW][eE][bB][mM]
+*.[oO][pP][uU][sS]
+*.[mM]4[vV]

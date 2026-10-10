@@ -41,7 +41,28 @@ Use the boot service or foreground launcher to own the server. Do not start two 
 
 ## Backups and migration
 
-Stop the application before copying SQLite, or use SQLite's online backup facility. Keep a matching private backup of `prisma/dev.db`, the complete `public/uploads/` directory, `.env`, and `.env.local`. Restore those paths on a new server, preserve owner-only environment permissions, install locked dependencies, build, and check login/media before switching traffic. Original and derived upload files belong in the backup; caches under `work/` can be regenerated. Browser favorites and themes are tied to each browser/site address and are separate from SQLite backups.
+Stop the application before copying SQLite, or use SQLite's online backup facility. Keep a matching private backup of `prisma/dev.db`, the complete `public/uploads/` directory, `.env`, `.env.local`, `.runtime/admin-auth.json`, `.runtime/visitor-exclusions.json`, and `.runtime/shared-links/` when present. Restore those paths on a new server, preserve owner-only environment permissions, install locked dependencies, build, and check login/media before switching traffic. Original and derived upload files belong in the backup; caches under `work/` can be regenerated. Browser favorites and themes are tied to each browser/site address and are separate from SQLite backups.
+
+### Copy a private backup on Debian/Ubuntu
+
+Stop the foreground launcher with `./archive stop`, or the boot service with `sudo systemctl stop "the-archive@$USER"`. Then run this from the project folder:
+
+```bash
+archive_backup="$HOME/Archive-backups/$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$archive_backup"
+chmod 700 "$HOME/Archive-backups" "$archive_backup"
+cp -a --parents .env .env.local prisma/dev.db public/uploads "$archive_backup/"
+for archive_private in .runtime/admin-auth.json .runtime/visitor-exclusions.json .runtime/shared-links; do
+  if [ -e "$archive_private" ]; then
+    cp -a --parents "$archive_private" "$archive_backup/"
+  fi
+done
+chmod -R go-rwx "$archive_backup"
+```
+
+Check that the copy finished without errors and contains the expected files, then restart with `./archive start` or `sudo systemctl start "the-archive@$USER"`. Store a second private copy on a separate disk. These backup files contain your photos, passwords, and visitor information; never upload them to a public repository.
+
+For an optional named Cloudflare Tunnel, separately preserve its private `/etc/the-archive-tunnel/` configuration through your administrator's backup process. Changing the public hostname can break already sent URLs. See [Sharing](SHARING.md) before a migration. Read [Administration](ADMIN.md) for password or identity-mode recovery.
 
 ## Release upgrades
 
@@ -49,11 +70,11 @@ Back up first and record the current revision. Substitute the desired release ta
 
 ```bash
 git fetch origin --tags
-git checkout v1.1.0
+git checkout v1.3.0
 ./archive install
 ```
 
-Read the release's schema notes. v1.1.0 requires no database schema change from v1.0.0. Apply future schema changes only after review; never accept a destructive reset as an installation fix.
+v1.3.0 has no schema change from v1.2.0. If upgrading from an older release, apply the optional soundtrack fields introduced in v1.2.0 with `pnpm db:push` after reviewing the schema. Never accept a destructive reset as an installation fix. Existing credentials and login mode are preserved; only fresh installations default to password login.
 
 For the boot service:
 

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { ADMIN_COOKIE, adminCookieOptions, createSessionToken, getAdminAccount, hashPassword, isValidSession, passwordMatches } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getAdminAuthMode } from "@/lib/admin-auth-settings";
 
 export async function PATCH(request: NextRequest) {
   if (!await isValidSession(request.cookies.get(ADMIN_COOKIE)?.value)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -18,7 +19,8 @@ export async function PATCH(request: NextRequest) {
   const changed = await prisma.adminAccount.updateMany({ where: { id: account.id, sessionVersion: account.sessionVersion }, data: { username, passwordHash, sessionVersion: randomUUID() } });
   if (!changed.count) return NextResponse.json({ error: "The login changed in another session. Sign in again." }, { status: 409 });
   const response = NextResponse.json({ ok: true, username });
-  response.cookies.set(ADMIN_COOKIE, await createSessionToken(), adminCookieOptions);
+  const cloudflareExpires = await getAdminAuthMode() === "cloudflare" ? Math.floor(Number(request.cookies.get(ADMIN_COOKIE)?.value?.split(":")[1]) / 1000) : undefined;
+  response.cookies.set(ADMIN_COOKIE, await createSessionToken({ cloudflareExpires }), adminCookieOptions);
   revalidatePath("/admin"); revalidatePath("/");
   return response;
 }
