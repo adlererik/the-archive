@@ -35,7 +35,7 @@ Drag in another file to replace the track. Use the soundtrack trash button to re
 
 ## Cast with sound
 
-Cast uses the normal Google Cast receiver. The server prepares a compatible MP4 that combines the selected image/video with its soundtrack, trim, volume, loop, and original-audio setting. The TV receives that media file, not the webpage or a separate browser audio stream. Preparation may take longer for large videos. A single cast photo repeats its prepared slide. Favorites presentation photos use the selected photo duration. Each cast carousel/favorite item starts its soundtrack segment at the configured trim start; a continuous cross-item soundtrack is available locally within a post, not across separately queued TV files.
+In Chrome, casting uses the normal Google Cast receiver. Safari uses native AirPlay through the same Cast button. The server prepares a compatible MP4 that combines the selected image/video with its soundtrack, trim, volume, loop, and original-audio setting. The TV receives that media file, not the webpage or a separate browser audio stream. Preparation may take longer for large videos. A single cast photo repeats its prepared slide. Favorites presentation photos use the selected photo duration. Each cast carousel/favorite item starts its soundtrack segment at the configured trim start; a continuous cross-item soundtrack is available locally within a post, not across separately queued TV files.
 
 ## Five gallery themes
 

@@ -84,7 +84,7 @@ Statistics include visits, collection counts/hearts, approximate city/country, d
 
 Import your own extracted Instagram export locally. The standalone importer reads JSON from disk, preserves dates/carousel order, repairs common double-encoded captions, copies media into local uploads, and uses source IDs to avoid duplicate imports. It does not require publishing your export or giving Instagram credentials to this project.
 
-Originals and generated previews/playback/casting files live under `public/uploads/`; Prisma/SQLite stores posts, ordering, settings, and account/visitor information. Streaming supports byte ranges and Cast media CORS. This is not automatic backup: protect your database, uploads, and environment settings separately.
+Originals and generated previews/playback files live under `public/uploads/`; regenerable TV clips are cached privately in `work/cast-slides/`; Prisma/SQLite stores posts, ordering, settings, and account/visitor information. Streaming supports byte ranges and Cast media CORS. This is not automatic backup: protect your database, uploads, and environment settings separately.
 
 ## Install and maintain
 

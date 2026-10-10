@@ -84,3 +84,13 @@ The updated production build completed with TypeScript checks. The workstation s
 Before activating this correction, the project owner confirmed that the original AirPlay implementation worked from an iPhone with a different, AirPlay-compatible TV. That is user-reported physical confirmation of the original implementation and receiver compatibility diagnosis, not a device test of the revised handoff.
 
 The corrective update’s separate Debian production build completed successfully. After administrator activation, the live source commit and build ID matched the prepared correction. The site and tunnel services were active and enabled at boot. Gallery, Favorites, login, and Cast configuration returned HTTP 200 on port 3000; public HTTPS requests succeeded, and the browser bundle served by the public site contains the displayed-video handoff. The earlier production build/database backup remains available through the deployment’s rollback mechanism. Physical video/audio playback with this revised handoff still requires owner confirmation.
+
+## Public v1.2.0 source release — October 10, 2026
+
+A separate installation extracted only tracked source and ran `./archive setup` with locked dependencies. The production compilation, TypeScript checks, static generation, and build tracing completed successfully. Its production launcher started on an isolated verification port so the existing gallery remained available.
+
+Before browsing, the new database had zero posts, media items, and visits, and uploads contained no files beyond `.gitkeep`. Setup generated credentials distinct from the live installation and environment files with mode 0600. Gallery, Favorites, privacy, login, posts, and Cast configuration returned HTTP 200. The posts and Favorites responses were empty. Initial admin login succeeded with a signed HTTP-only SameSite cookie, and authenticated Admin rendered the included feature guide. No private credential value is recorded here.
+
+All local documentation links resolve. Git history, the index, and the source-only ZIP/tarball are checked for excluded private paths, common credential formats, and known private installation credential matches. Release archives are generated from Git source, not the working directory, and include SHA-256 checksums. Erik Adler's requested attribution and public repository address are intentional; installation identities, private credentials, original media, databases, visitor records, and runtime artifacts are excluded.
+
+These checks establish clean installation and source-package health. They do not add a new physical-phone/TV test; the earlier receiver confirmations and latest AirPlay handoff limitations above still apply.
