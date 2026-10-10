@@ -1,5 +1,13 @@
 # Development notes
 
+## One Cast button for Google Cast and AirPlay
+
+- Erik Adler: keep the existing Cast icon, styling, and placement unchanged; invoke Safari’s native `webkitShowPlaybackTargetPicker()` from the same button.
+- Erik Adler: preserve Chrome’s Google Cast discovery, default receiver, media URLs, and receiver queues.
+- Erik Adler: distinguish browser capability from receiver discovery; disable only unsupported browsers.
+- Erik Adler: isolate the native AirPlay transport from recycled local previews; send only selected media, support photos/soundtracks and page-driven Favorites playback, and reuse existing remote controls.
+- Erik Adler: document AirPlay receiver requirements and sender-lifecycle limits.
+
 ## Carousel curation, soundtracks, and gallery palettes
 
 - Erik Adler: edit carousel sequence by drag/drop or accessible move controls; add/remove assets and extend single posts into carousels.

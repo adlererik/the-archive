@@ -2,15 +2,19 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { ArchiveMedia } from "@/lib/archive";
 import { mediaUrl } from "@/lib/archive";
+import { supportsAirPlay, useAirPlay } from "@/lib/use-airplay";
 import { castWindow, type CastContext, type RemoteController, type RemotePlayer } from "@/lib/cast-sdk";
 
-export type CastOptions = { mode?: "single" | "presentation"; photoSeconds?: number; loop?: boolean; startIndex?: number };
-type State = { ready: boolean; available: boolean; connected: boolean; busy: boolean; reason: string; error: string; device: string; mode: "single" | "presentation" | null; activeId: string; paused: boolean; ended: boolean; castItems: (items: ArchiveMedia[], options?: CastOptions) => Promise<void>; stop: () => void; togglePlayback: () => void; jump: (id: string) => void };
+export type CastOptions = { mode?: "single" | "presentation"; photoSeconds?: number; loop?: boolean; startIndex?: number; openPicker?: boolean };
+type State = { transport: "google" | "airplay"; supported: boolean; ready: boolean; available: boolean; connected: boolean; busy: boolean; reason: string; error: string; device: string; mode: "single" | "presentation" | null; activeId: string; paused: boolean; ended: boolean; castItems: (items: ArchiveMedia[], options?: CastOptions) => Promise<void>; clearError: () => void; stop: () => void; togglePlayback: () => void; jump: (id: string) => void };
 const Context = createContext<State | null>(null);
 export function CastProvider({ children }: { children: React.ReactNode }) {
+  const airplay = useAirPlay();
+  const [supported, setSupported] = useState(false);
   const [ready, setReady] = useState(false); const [available, setAvailable] = useState(false); const [connected, setConnected] = useState(false); const [busy, setBusy] = useState(false); const [reason, setReason] = useState("Checking casting availability…"); const [error, setError] = useState(""); const [device, setDevice] = useState(""); const [mode, setMode] = useState<State["mode"]>(null); const [activeId, setActiveId] = useState(""); const [paused, setPaused] = useState(false); const [ended, setEnded] = useState(false);
   const context = useRef<CastContext | null>(null); const controller = useRef<RemoteController | null>(null); const remote = useRef<RemotePlayer | null>(null); const epoch = useRef(0); const last = useRef<{ id: string; loop: boolean } | null>(null);
   useEffect(() => {
+    if (supportsAirPlay()) { setReady(true); return; }
     if (!window.isSecureContext) { setReady(true); setReason("Google Cast requires Chrome and HTTPS. Open the archive's HTTPS address to connect to a TV."); return; }
     const sdk = castWindow(); let cleanup = () => {}; let disposed = false;
     const initialize = (supported: boolean) => {
@@ -18,6 +22,7 @@ export function CastProvider({ children }: { children: React.ReactNode }) {
       if (!supported || !sdk.cast?.framework || !sdk.chrome?.cast) { setReady(true); setReason("Use a Google Cast-supported Chrome browser with a Chromecast or Google TV on the same network."); return; }
       try {
       const framework = sdk.cast.framework; const ctx = framework.CastContext.getInstance(); context.current = ctx;
+      setSupported(true);
       ctx.setOptions({ receiverApplicationId: sdk.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID, autoJoinPolicy: sdk.chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED });
       const player = new framework.RemotePlayer(); const controls = new framework.RemotePlayerController(player); remote.current = player; controller.current = controls;
       const changed = () => {
@@ -32,7 +37,7 @@ export function CastProvider({ children }: { children: React.ReactNode }) {
       };
       ctx.addEventListener(framework.CastContextEventType.CAST_STATE_CHANGED, changed); ctx.addEventListener(framework.CastContextEventType.SESSION_STATE_CHANGED, changed); controls.addEventListener(framework.RemotePlayerEventType.ANY_CHANGE, changed); changed();
       cleanup = () => { ctx.removeEventListener(framework.CastContextEventType.CAST_STATE_CHANGED, changed); ctx.removeEventListener(framework.CastContextEventType.SESSION_STATE_CHANGED, changed); controls.removeEventListener(framework.RemotePlayerEventType.ANY_CHANGE, changed); };
-      } catch { context.current = null; setReady(true); setAvailable(false); setReason("Google Cast is unavailable in this browser. Use Chrome on an HTTPS archive address."); }
+      } catch { context.current = null; setSupported(false); setReady(true); setAvailable(false); setReason("Google Cast is unavailable in this browser. Use Chrome on an HTTPS archive address."); }
     };
     sdk.__onGCastApiAvailable = initialize;
     if (sdk.cast?.framework) initialize(true);
@@ -71,6 +76,9 @@ export function CastProvider({ children }: { children: React.ReactNode }) {
   const stop = useCallback(() => { epoch.current++; setBusy(false); setError(""); context.current?.getCurrentSession()?.endSession(true); setMode(null); setActiveId(""); setConnected(false); }, []);
   const jump = useCallback((id: string) => { const media = context.current?.getCurrentSession()?.getMediaSession(); const item = media?.items?.find(item => item.media.customData?.archiveMediaId === id); if (item?.itemId != null) media?.queueJumpToItem(item.itemId, () => setActiveId(id), () => setError("Unable to switch the TV to this item.")); }, []);
   const togglePlayback = useCallback(() => controller.current?.playOrPause(), []);
-  return <Context.Provider value={{ ready, available, connected, busy, reason, error, device, mode, activeId, paused, ended, castItems, stop, togglePlayback, jump }}>{children}<div role="status" className="sr-only">{busy ? "Preparing media for casting" : error}</div>{error ? <aside role="alert" className="fixed bottom-4 left-4 right-4 z-[90] rounded-xl border border-white/30 bg-black/95 p-4 text-sm text-white shadow-2xl sm:left-auto sm:max-w-lg"><p>{error}</p><div className="mt-2 flex gap-4">{connected ? <button onClick={stop} className="min-h-11 underline">Stop casting</button> : null}<button onClick={() => setError("")} className="min-h-11 underline">Dismiss</button></div></aside> : null}{connected && mode && !error ? <aside aria-label="Casting controls" className="fixed bottom-4 left-4 right-4 z-40 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#d4af37]/40 bg-black/95 px-4 py-3 text-sm text-studio-soft shadow-2xl sm:left-auto sm:max-w-lg"><span>On {device || "your TV"}</span><div className="flex gap-2"><button onClick={togglePlayback} className="min-h-11 rounded-full border border-white/20 px-3">{paused ? "Play on TV" : "Pause on TV"}</button><button onClick={stop} className="min-h-11 rounded-full border border-[#d4af37]/40 px-3">Stop casting</button></div></aside> : null}</Context.Provider>;
+  const value: State = airplay.supported
+    ? { ...airplay, transport: "airplay", ready: true, available: true }
+    : { transport: "google", supported, ready, available: supported || available, connected, busy, reason, error, device, mode, activeId, paused, ended, castItems, clearError: () => setError(""), stop, togglePlayback, jump };
+  return <Context.Provider value={value}>{children}<div role="status" className="sr-only">{value.busy ? "Preparing media for casting" : value.error}</div>{value.error ? <aside role="alert" className="fixed bottom-4 left-4 right-4 z-[90] rounded-xl border border-white/30 bg-black/95 p-4 text-sm text-white shadow-2xl sm:left-auto sm:max-w-lg"><p>{value.error}</p><div className="mt-2 flex gap-4">{value.connected ? <button onClick={value.stop} className="min-h-11 underline">Stop casting</button> : null}<button onClick={value.clearError} className="min-h-11 underline">Dismiss</button></div></aside> : null}{value.connected && value.mode && !value.error ? <aside aria-label="Casting controls" className="fixed bottom-4 left-4 right-4 z-40 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#d4af37]/40 bg-black/95 px-4 py-3 text-sm text-studio-soft shadow-2xl sm:left-auto sm:max-w-lg"><span>On {value.device || "your TV"}</span><div className="flex gap-2"><button onClick={value.togglePlayback} className="min-h-11 rounded-full border border-white/20 px-3">{value.paused ? "Play on TV" : "Pause on TV"}</button><button onClick={value.stop} className="min-h-11 rounded-full border border-[#d4af37]/40 px-3">Stop casting</button></div></aside> : null}</Context.Provider>;
 }
 export function useCast() { const value = useContext(Context); if (!value) throw new Error("CastProvider is required"); return value; }

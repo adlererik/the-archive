@@ -1,4 +1,4 @@
-# Favorites, presentations, and Google Cast
+# Favorites, presentations, Google Cast, and AirPlay
 
 By Erik Adler.
 
@@ -32,9 +32,21 @@ The wall reuses one video element across cards and carousel selections, helping 
 
 Mobile browsers can still require an initial tap before audible playback. A vertical scroll or mouse hover alone cannot guarantee audio permission, and device volume remains under the viewer's control. See [WebKit's video policy](https://webkit.org/blog/6784/new-video-policies-for-ios/) and [Chrome's autoplay policy](https://developer.chrome.com/blog/autoplay). Muted preview is used only when the browser rejects sound, so the video remains viewable.
 
+## AirPlay in Safari
+
+In Safari on iPhone, iPad, or Mac, tap the existing Cast icon on the selected photo/video to open Safari’s native AirPlay picker. Select an AirPlay-compatible TV or Apple TV on the same network. No second icon is added. The application calls `webkitShowPlaybackTargetPicker()` directly during that button click, before any asynchronous work, and explicitly enables AirPlay on its native video player. It detects the API rather than guessing from a device name.
+
+The native transport player is separate from recycled wall previews, so hovering another card or closing a viewer does not accidentally destroy the TV’s player. Only media is sent; the website and admin controls are not mirrored. Images and soundtrack-bearing media use the same server-generated MP4 assets as Google Cast. FFmpeg is needed for those assets. Plain videos use their compatible playback file. Local gallery playback pauses once Safari reports a wireless connection. Existing Play/Pause on TV and Stop casting controls apply to AirPlay too. Stop casting stops the media; Safari owns the system’s selected output route.
+
+Carousel selections update the AirPlay media. Favorites presentations advance through the native video player’s ended events, with the configured photo interval and repeat option. Unlike a Google Cast receiver queue, these advances depend on the sender page remaining alive; Safari may suspend it in the background. The application cannot promise an independent AirPlay slideshow after the phone locks.
+
+Use the archive’s HTTPS address, keep the TV able to reach its media URLs, and check the TV’s AirPlay permissions. Safari controls device discovery; this site cannot choose a receiver silently or grant access to the TV. A supported Safari browser keeps the button enabled even before a nearby receiver is discovered.
+
+Official references: [Apple’s custom AirPlay button](https://developer.apple.com/documentation/webkitjs/adding_an_airplay_button_to_your_safari_media_controls) and [enabling AirPlay for HTML video](https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/AirPlayGuide/OptingInorOutofAirPlay/OptingInorOutofAirPlay.html).
+
 ## Google Cast
 
-Open a photo or video and use its Cast icon. The Cast icon is overlaid in the upper-right corner of photos and videos, including wall previews. It casts the currently selected item without opening the theater. A white icon indicates availability, gold indicates an active cast; otherwise tapping the dim icon explains what is missing. Choose your Chromecast or Google Cast-enabled TV. The receiver loads the media from your archive. This application never requests tab, screen, or desktop mirroring, and never casts its page, admin controls, favorites grid, or captions.
+Open a photo or video and use its Cast icon. The Cast icon is overlaid in the upper-right corner of photos and videos, including wall previews. It casts the currently selected item without opening the theater. The same icon is used for Google Cast in supported Chrome and native AirPlay in Safari. Its styling and position are unchanged. A white icon indicates browser support and gold indicates an active cast. A browser with neither API keeps a disabled, dim icon explaining the requirement; a missing receiver does not disable a supported browser’s picker. Choose your Chromecast or Google Cast-enabled TV. The receiver loads the media from your archive. This application never requests tab, screen, or desktop mirroring, and never casts its page, admin controls, favorites grid, or captions.
 
 While a single item is cast, changing the selected carousel item in the same card or viewer updates the TV. Tap the active overlay for the Stop casting option, or use the persistent casting controls. Local video playback pauses to avoid duplicate audio. Pause/Play on TV and Stop casting control the receiver.
 
@@ -44,7 +56,7 @@ The standard Google receiver supports the mixed queue without a custom receiver 
 
 ### Browser, HTTPS, and network setup
 
-- Use a Google Cast-supported Chrome browser. Chrome on iOS does not support the Web Sender SDK. Safari and the embedded preview browser may not expose Google Cast.
+- Use a Google Cast-supported Chrome browser. Chrome on iOS does not support the Web Sender SDK. Safari uses native AirPlay through the same icon. Embedded browsers may expose neither API.
 - Serve the archive over HTTPS for phones and normal network access. An `http://192.168...` sender page is insecure and cannot use the required Cast presentation API. The computer's localhost origin is a development exception, but the TV still cannot use localhost to download media.
 - Keep the sender and TV on the same network, with Cast discovery allowed by the router. Guest Wi-Fi and network isolation can prevent discovery.
 - The TV must be able to download the media URL. By default, casting uses the HTTPS origin currently open in the sender browser. This preserves the public tunnel hostname and HTTPS scheme instead of sending an internal HTTP listener address. An optional `CAST_MEDIA_ORIGIN=https://your-archive-domain.example` in `.env.local` (or `NEXT_PUBLIC_CAST_MEDIA_ORIGIN`) can override it for a separate HTTPS media host; leave these unset for rotating Quick Tunnel URLs. Localhost and HTTP media origins are rejected before loading the receiver. A successful device connection alone does not mean the media loaded; receiver load errors appear visibly, and an empty or failed session does not suppress local wall playback.

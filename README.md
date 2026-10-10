@@ -28,7 +28,7 @@ It focuses on personal galleries and media preservation: viewers can browse memo
 | Desktop theater | A large media viewer with full captions, audio, media navigation, and keyboard controls. |
 | Mobile playback | Inline photos/videos and native video controls, with playback following the visible item. |
 | Controlled sound | Sound requested by default, a small speaker toggle, and one active local video to avoid overlapping audio. |
-| Google Cast | Send the selected media to a compatible TV from a discreet overlay, including directly from the wall. |
+| Google Cast / AirPlay | One unchanged Cast overlay sends selected media through Google Cast in Chrome or native AirPlay in Safari, including directly from the wall. |
 | Personal favorites | Save individual carousel photos/videos, reorder them, and build a presentation. |
 | TV presentations | Timed photos and complete videos, optional repeat, receiver-side queues, and play/pause/stop controls. |
 | Hearts | Visitors can like a whole post separately from saving individual favorites. |
@@ -88,7 +88,7 @@ The importer reads JSON directly from disk, preserves timestamps/carousels, fixe
 
 ## Playback and casting requirements
 
-Google Cast needs supported Chrome, a compatible receiver, an HTTPS gallery, and media the TV can fetch. Only selected media or a favorites queue is sent to the TV. Photos are converted locally to still-image MP4 slides; FFmpeg is required.
+The same Cast button uses Google Cast in supported Chrome and Safari’s native AirPlay picker on Apple devices. Casting needs a compatible receiver, an HTTPS gallery, and media the TV can fetch. AirPlay presentation advancement depends on the sender page remaining active. Only selected media or a favorites queue is sent to the TV. Photos are converted locally to still-image MP4 slides; FFmpeg is required.
 
 Browsers can require a tap before allowing audible autoplay. The gallery requests sound by default and provides a discreet speaker control and native mobile video controls. Favorites and theme preferences are stored per browser and site address.
 
