@@ -30,11 +30,22 @@ The comparison above describes Erik's experience and priorities. This project fo
 
 The project's existing screenshots are preserved below. They illustrate the gallery; a fresh installation starts empty with your own media.
 
-<img width="1080" height="2404" alt="24905" src="https://github.com/user-attachments/assets/f4bfb770-9cc0-4cd7-b3e3-cafffa898c91" />
+<img width="1920" height="1080" alt="Screenshot From 2026-10-10 23-37-56" src="https://github.com/user-attachments/assets/65ab78eb-f864-4f27-af84-53d5907f5e51" />
 
-<img width="1080" height="2404" alt="24908" src="https://github.com/user-attachments/assets/acf4d090-19e5-4658-bb5d-2a81b5ca2dfb" />
+<img width="1920" height="1080" alt="Screenshot From 2026-10-10 23-38-24" src="https://github.com/user-attachments/assets/da20533c-1464-41ea-8d95-ccb0d30cb54a" />
 
-<img width="1080" height="2404" alt="24910" src="https://github.com/user-attachments/assets/e5b9ca24-3581-4702-a6b3-62ad74fd41f3" />
+<img width="1920" height="1080" alt="Screenshot From 2026-10-10 23-41-55" src="https://github.com/user-attachments/assets/30c3b3ec-c550-4022-8de9-746a31f82d39" />
+
+<img width="1920" height="1080" alt="Screenshot From 2026-10-10 23-39-40" src="https://github.com/user-attachments/assets/b7302eb8-c765-4d8b-9c45-2e3d9fba2bc0" />
+
+<img width="1920" height="1080" alt="Screenshot From 2026-10-10 23-41-02" src="https://github.com/user-attachments/assets/cb28cb67-3871-401d-8df6-577321ba964f" />
+
+<img width="1920" height="1080" alt="Screenshot From 2026-10-10 23-40-17" src="https://github.com/user-attachments/assets/271f2eef-5246-4e3f-b9cb-85048c2c935f" />
+
+
+
+
+
 
 
 ## Start here
